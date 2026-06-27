@@ -1,0 +1,108 @@
+:root {
+  color: #17202a;
+  background: #f5f7fa;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+main {
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.shell {
+  display: grid;
+  gap: 24px;
+  margin: 0 auto;
+  max-width: 1120px;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.summary {
+  display: grid;
+  gap: 12px;
+}
+
+.summary h1 {
+  font-size: 32px;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.summary p {
+  color: #465a69;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 760px;
+}
+
+.validator {
+  display: grid;
+  gap: 16px;
+}
+
+.validator textarea {
+  border: 1px solid #c9d6e2;
+  border-radius: 6px;
+  color: #17202a;
+  min-height: 360px;
+  padding: 14px;
+  resize: vertical;
+  width: 100%;
+}
+
+.validator button {
+  background: #155e75;
+  border: 0;
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+  justify-self: start;
+  padding: 10px 14px;
+}
+
+.validator button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.result {
+  border-radius: 6px;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
+.result.ok {
+  background: #e8f7ef;
+  color: #17472a;
+}
+
+.result.error {
+  background: #fdecec;
+  color: #7a1e1e;
+}

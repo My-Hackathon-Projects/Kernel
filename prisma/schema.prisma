@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Workspace {
+  id          String       @id @default(cuid())
+  name        String
+  targets     Target[]
+  auditEvents AuditEvent[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Target {
+  id          String     @id @default(cuid())
+  workspaceId String
+  name        String
+  baseUrl     String
+  authMode    String     @default("none")
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workflows   Workflow[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+}
+
+model Workflow {
+  id            String          @id @default(cuid())
+  targetId      String
+  name          String
+  version       Int
+  definition    Json
+  contentHash   String
+  target        Target          @relation(fields: [targetId], references: [id], onDelete: Cascade)
+  tool          Tool?
+  selectorPatches SelectorPatch[]
+  createdAt     DateTime        @default(now())
+
+  @@unique([targetId, name, version])
+  @@index([targetId])
+}
+
+model Tool {
+  id          String    @id @default(cuid())
+  workflowId  String    @unique
+  name        String
+  inputSchema Json
+  enabled     Boolean   @default(true)
+  workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  runs        Run[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Run {
+  id              String            @id @default(cuid())
+  toolId          String
+  workflowVersion Int
+  input           Json
+  status          String            @default("pending")
+  error           String?
+  callerId        String?
+  tool            Tool              @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  steps           RunStep[]
+  approvals       ApprovalRequest[]
+  validations     Validation[]
+  artifacts       Artifact[]
+  auditEvents     AuditEvent[]
+  selectorPatches SelectorPatch[]
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([toolId])
+  @@index([status])
+}
+
+model RunStep {
+  id            String    @id @default(cuid())
+  runId         String
+  stepId        String
+  action        String
+  selector      String?
+  resolvedValue String?
+  resolvedTier  Int?
+  status        String
+  durationMs    Int?
+  screenshotId  String?
+  domSnapshotId String?
+  run           Run       @relation(fields: [runId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([runId])
+  @@index([stepId])
+}
+
+model ApprovalRequest {
+  id        String    @id @default(cuid())
+  runId     String
+  stepId    String
+  prompt    String
+  payload   Json
+  status    String    @default("pending")
+  decidedBy String?
+  decidedAt DateTime?
+  run       Run       @relation(fields: [runId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([runId])
+  @@index([status])
+}
+
+model Validation {
+  id        String   @id @default(cuid())
+  runId     String
+  type      String
+  expected  Json
+  actual    Json?
+  passed    Boolean
+  reason    String?
+  run       Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([runId])
+}
+
+model SelectorPatch {
+  id          String    @id @default(cuid())
+  workflowId  String
+  runId       String?
+  stepId      String
+  oldSelector String?
+  newSelector String
+  tier        Int
+  confidence  Float
+  accepted    Boolean   @default(false)
+  workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  run         Run?      @relation(fields: [runId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([workflowId])
+  @@index([runId])
+}
+
+model Artifact {
+  id        String   @id @default(cuid())
+  runId     String
+  stepId    String?
+  kind      String
+  uri       String
+  run       Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([runId])
+  @@index([stepId])
+}
+
+model AuditEvent {
+  id          String    @id @default(cuid())
+  workspaceId String
+  runId       String?
+  type        String
+  data        Json
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  run         Run?      @relation(fields: [runId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId])
+  @@index([runId])
+}

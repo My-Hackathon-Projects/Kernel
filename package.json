@@ -1,0 +1,40 @@
+{
+  "name": "agentport",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "dependencies": {
+    "@prisma/client": "6.19.3"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "check": "pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm db:validate && pnpm build",
+    "db:generate": "DATABASE_URL=file:./dev.db prisma generate --schema prisma/schema.prisma",
+    "db:validate": "DATABASE_URL=file:./dev.db prisma validate --schema prisma/schema.prisma",
+    "dev": "turbo run dev",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint": "eslint . --max-warnings=0",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "26.0.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.4",
+    "prettier": "3.9.0",
+    "prisma": "6.19.3",
+    "tsx": "4.22.4",
+    "turbo": "2.10.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.62.0",
+    "vitest": "4.1.9"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.15"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "noEmit": true,
+    "plugins": [{ "name": "next" }],
+    "types": ["node", "react", "react-dom", "vitest/globals"]
+  },
+  "include": ["app/**/*.ts", "app/**/*.tsx", "test/**/*.ts", "next.config.mjs"],
+  "exclude": ["node_modules"]
+}

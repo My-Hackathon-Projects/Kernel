@@ -1,0 +1,12 @@
+node_modules/
+.npm-cache/
+.next/
+.turbo/
+**/.next/
+**/.turbo/
+coverage/
+dist/
+playwright-report/
+test-results/
+pnpm-lock.yaml
+docs/
