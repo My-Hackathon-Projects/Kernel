@@ -37,7 +37,7 @@ export function SiteFooter() {
       <div className="site-footer-legal">
         <p>© {year} Kernel. All rights reserved.</p>
         <p>
-          <Link href="/imprint">Imprint</Link> · Kernel Technologies
+          <Link href="/imprint">Imprint</Link> · Kernel
         </p>
       </div>
     </footer>

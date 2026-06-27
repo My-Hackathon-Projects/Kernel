@@ -163,6 +163,9 @@ field is a declared input, and content-hashes the version.
   `{ "decision": "approve" | "reject" }` and resumes or rejects the paused run.
 - `GET /api/runs/:runId` returns run details, ordered steps, approvals,
   validations, artifacts, trace events, audit records, and selector patches.
+- `DELETE /api/runs/:runId` deletes a run with its steps, screenshots, approvals,
+  and validations, and removes the screenshot files. The append-only audit trail
+  is preserved.
 - `GET /api/runs/:runId/stream` emits persisted trace events as server-sent
   events.
 - `GET /api/runs/:runId/artifacts/:artifactId` returns stored screenshots.
@@ -171,8 +174,12 @@ field is a declared input, and content-hashes the version.
   selector cache and recompiles the persisted tool definition.
 - `/mcp` exposes the MCP Streamable HTTP endpoint.
 
-Dashboard pages: `/` (invoke, approvals, studio), `/studio`, `/tools`, `/runs`,
-`/runs/:runId`, `/patches`.
+Each run is given a short sequential number (for example `#100001`). The runs
+table sorts, filters, and deletes by that number.
+
+Dashboard pages: `/` (landing), `/console` (invoke and approvals), `/studio`,
+`/tools`, `/runs` (numbered, sortable, filterable, deletable), `/runs/:runId`,
+`/patches`, `/about`, `/contact`, `/imprint`.
 
 ### Runner
 

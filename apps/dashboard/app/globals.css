@@ -411,37 +411,23 @@ main {
   color: transparent;
 }
 
-.hero-lead {
-  margin: 22px 0 0;
-  max-width: 560px;
-  color: var(--on-canvas-soft);
-  font-size: clamp(17px, 2.2vw, 21px);
-  font-weight: 500;
-  line-height: 1.6;
-}
-
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
-  margin-top: 30px;
+  margin-top: 32px;
 }
 
 .hero-art {
   position: relative;
   display: grid;
   place-items: center;
-  width: min(100%, 380px);
-  aspect-ratio: 1;
+  width: min(100%, 360px);
+  aspect-ratio: 4 / 5;
   margin-inline: auto;
   overflow: hidden;
   border-radius: 28px;
-  background: radial-gradient(
-    120% 120% at 30% 18%,
-    #ffffff 0%,
-    #eef1f8 55%,
-    #e2e7f3 100%
-  );
+  background: #f6f6f7;
   box-shadow:
     var(--shadow-card),
     0 0 0 1px rgba(255, 255, 255, 0.08),
@@ -449,10 +435,10 @@ main {
 }
 
 .hero-art img {
-  width: 88%;
-  height: 88%;
-  object-fit: contain;
-  filter: drop-shadow(0 18px 34px rgba(11, 18, 32, 0.18));
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 /* ----------------------------------------------------------------- Buttons */
@@ -998,93 +984,6 @@ td a {
   padding: 28px;
   text-align: center;
   color: var(--ink-soft);
-}
-
-/* ---------------------------------------------------------- Landing + cards */
-
-.feature-grid {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-
-.feature-card {
-  display: grid;
-  gap: 8px;
-  align-content: start;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--panel-muted);
-  padding: 20px;
-  color: var(--ink);
-  transition:
-    transform 0.18s var(--ease-out),
-    box-shadow 0.2s var(--ease-out);
-}
-
-.feature-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 20px 50px rgba(11, 18, 32, 0.12);
-  text-decoration: none;
-}
-
-.feature-card h3 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.feature-card p {
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 15px;
-  line-height: 1.55;
-}
-
-.feature-card .feature-tag {
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--agent-2);
-}
-
-.flow-steps {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  counter-reset: flow;
-  list-style: none;
-  margin: 16px 0 0;
-  padding: 0;
-}
-
-.flow-steps li {
-  position: relative;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--panel-muted);
-  padding: 18px 18px 18px 18px;
-  color: var(--ink-soft);
-  line-height: 1.5;
-}
-
-.flow-steps li::before {
-  counter-increment: flow;
-  content: counter(flow);
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  background: linear-gradient(120deg, var(--agent), var(--agent-2));
-  color: #06121c;
-  font-weight: 800;
-}
-
-.flow-steps li strong {
-  color: var(--ink);
 }
 
 /* ---------------------------------------------------------- Prose (legal) */

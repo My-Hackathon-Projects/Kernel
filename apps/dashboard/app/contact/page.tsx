@@ -44,7 +44,7 @@ export default function ContactPage() {
             </div>
             <div className="contact-card">
               <h3>Office</h3>
-              <p>Kernel Technologies</p>
+              <p>Kernel</p>
               <p>Remote-first, Europe</p>
             </div>
           </div>

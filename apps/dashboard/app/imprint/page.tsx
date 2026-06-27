@@ -22,7 +22,7 @@ export default function ImprintPage() {
           <div className="prose">
             <h2>Provider</h2>
             <p>
-              Kernel Technologies
+              Kernel
               <br />
               Remote-first, Europe
             </p>
