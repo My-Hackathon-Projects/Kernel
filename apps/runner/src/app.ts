@@ -1,32 +1,20 @@
-import { parseExecuteRequest } from "@agentport/core";
 import Fastify from "fastify";
+import { executeRoutes } from "./routes/execute";
+import { healthRoutes } from "./routes/health";
 
 type RunnerOptions = {
   logger?: boolean;
 };
 
+/**
+ * Composition root for the runner service. Route handlers live in `./routes` so
+ * the M2 execution surface can grow without turning this file into a catch-all.
+ */
 export function buildRunner(options: RunnerOptions = {}) {
   const app = Fastify({ logger: options.logger ?? true });
 
-  app.get("/health", async () => ({
-    status: "ok",
-    service: "agentport-runner"
-  }));
-
-  app.post("/execute", async (request, reply) => {
-    const parsed = parseExecuteRequest(request.body);
-
-    if (!parsed.success) {
-      return reply.status(400).send(parsed.error);
-    }
-
-    return reply.status(202).send({
-      runId: parsed.data.runId,
-      status: "accepted",
-      message:
-        "Runner scaffold validated the request. Playwright execution lands in M2."
-    });
-  });
+  app.register(healthRoutes);
+  app.register(executeRoutes);
 
   return app;
 }

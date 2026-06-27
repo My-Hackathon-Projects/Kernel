@@ -47,3 +47,26 @@ export function formatZodError(error: ZodError): ApiErrorBody {
     })
   );
 }
+
+/** Type guard for the shared API error envelope `{ error: { code, message } }`. */
+export function isApiErrorBody(body: unknown): body is ApiErrorBody {
+  if (typeof body !== "object" || body === null || !("error" in body)) {
+    return false;
+  }
+
+  const error = (body as { error?: unknown }).error;
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    typeof (error as { code?: unknown }).code === "string" &&
+    typeof (error as { message?: unknown }).message === "string"
+  );
+}
+
+/**
+ * Reads a human-readable message from an unknown response body, falling back to
+ * the provided default when the body is not a typed API error.
+ */
+export function getApiErrorMessage(body: unknown, fallback: string): string {
+  return isApiErrorBody(body) ? body.error.message : fallback;
+}

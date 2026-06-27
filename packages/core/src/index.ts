@@ -1,6 +1,8 @@
 export {
   apiError,
   formatZodError,
+  getApiErrorMessage,
+  isApiErrorBody,
   validationError,
   type ApiErrorBody,
   type ApiErrorDetail

@@ -1,4 +1,4 @@
-import { WorkflowValidator } from "./components/workflow-validator";
+import { WorkflowValidator } from "../components/workflow-validator";
 
 export default function DashboardPage() {
   return (

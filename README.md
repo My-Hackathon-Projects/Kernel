@@ -10,16 +10,32 @@ deterministic Playwright runner lands in M2.
 
 ## Repository Layout
 
+The repository uses one convention across apps: `app/` for routes and API route
+handlers, `components/` and `hooks/` for front-end UI and client state, and `lib/`
+for data access and configuration.
+
 ```text
 apps/
-  dashboard/    Next.js control-plane UI and API routes
-  runner/       Fastify service shell for browser execution
-  mock-portal/  Next.js target app and vendor onboarding flow
+  dashboard/                Next.js control plane
+    app/                    routes, layouts, and the validate API handler
+    components/             workflow validator UI
+  runner/                   Fastify execution service
+    src/app.ts              composition root
+    src/routes/             health and execute route plugins
+  mock-portal/              Next.js demo target app
+    app/                    routes and the vendor API handler
+    components/vendors/      vendor form, split into focused components
+    hooks/                  client form state and submission
+    lib/                    in-memory vendor store and form config
 packages/
-  core/         Workflow and vendor contracts, zod schemas, validation helpers
-  db/           Prisma client export
+  core/                     shared contracts (single source of truth)
+    src/primitives.ts       shared zod building blocks
+    src/vendor.ts           vendor schemas
+    src/api-error.ts        typed API error envelope and helpers
+    src/workflow/           workflow schema, input parser, and fixture
+  db/                       Prisma client export (wired in M2+)
 prisma/
-  schema.prisma MVP data model for local SQLite
+  schema.prisma             control-plane data model for local SQLite
 ```
 
 ## Prerequisites

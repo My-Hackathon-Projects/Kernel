@@ -1,4 +1,9 @@
-import { apiError, createVendorInputSchema, formatZodError } from "@agentport/core";
+import {
+  apiError,
+  createVendorInputSchema,
+  formatZodError,
+  validationError
+} from "@agentport/core";
 import {
   createVendor,
   findVendorByCompanyName,
@@ -21,12 +26,9 @@ export async function GET(request: Request) {
 
   if (companyName !== null) {
     if (companyName.trim().length === 0) {
-      return json(
-        apiError("validation_failed", "Request validation failed", [
-          { path: "company_name", message: "Required" }
-        ]),
-        { status: 400 }
-      );
+      return json(validationError([{ path: "company_name", message: "Required" }]), {
+        status: 400
+      });
     }
 
     const vendor = findVendorByCompanyName(companyName);

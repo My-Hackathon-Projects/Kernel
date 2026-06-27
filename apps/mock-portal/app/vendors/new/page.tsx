@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { VendorForm, type VendorFormVariant } from "./vendor-form";
+import { VendorForm } from "../../../components/vendors/vendor-form";
+import { parseVariant } from "../../../lib/vendor-form-config";
 
 type NewVendorPageProps = {
   searchParams?: Promise<{
@@ -8,11 +9,6 @@ type NewVendorPageProps = {
 };
 
 export const dynamic = "force-dynamic";
-
-function parseVariant(value: string | string[] | undefined): VendorFormVariant {
-  const variant = Array.isArray(value) ? value[0] : value;
-  return variant === "v2" ? "v2" : "v1";
-}
 
 export default async function NewVendorPage({ searchParams }: NewVendorPageProps) {
   const params = await searchParams;

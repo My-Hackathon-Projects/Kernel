@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-const nonEmptyString = z.string().trim().min(1, "Required");
+import { nonEmptyString } from "./primitives";
 
 export const vendorRiskLevels = ["low", "medium", "high"] as const;
 export const vendorStatuses = ["Pending Approval"] as const;
