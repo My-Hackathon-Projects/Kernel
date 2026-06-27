@@ -65,3 +65,6 @@ Thumbs.db
 # Claude Code (local, not shared)
 CLAUDE.md
 .claude/
+
+# Codex Code (local, not shared)
+AGENTS.md
