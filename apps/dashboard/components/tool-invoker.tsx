@@ -1,251 +1,176 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type ToolInputProperty = {
   type: string;
   enum?: string[];
 };
 
-type DashboardTool = {
-  id: string;
-  name: string;
-  inputSchema: {
-    properties?: Record<string, ToolInputProperty>;
-    required?: string[];
-  };
-};
-
-type ToolsResponse = {
-  tools: DashboardTool[];
-};
-
-export type InvokeResult = {
+type InvokeResult = {
   run_id: string;
   status: string;
-  evidence_url: string;
-  validation: {
-    passed: boolean;
-    reason?: string;
-  } | null;
-  approval?: {
-    id: string;
-    status: string;
-  } | null;
+  validation: { passed: boolean; reason?: string } | null;
+  approval?: { id: string; status: string } | null;
 };
 
-type ApiError = {
-  error: {
-    code: string;
-    message: string;
-    details?: Array<{ path: string; message: string }>;
-  };
+const MOCK_TOOL = {
+  id: "demo-create-vendor",
+  name: "create_vendor",
+  inputSchema: {
+    properties: {
+      company_name: { type: "string" },
+      country:      { type: "string" },
+      tax_id:       { type: "string" },
+      risk_level:   { type: "string", enum: ["low", "medium", "high"] }
+    } as Record<string, ToolInputProperty>,
+    required: ["company_name", "country", "tax_id", "risk_level"]
+  }
 };
 
-type ToolInvokerProps = {
-  onResult?: (result: InvokeResult) => void;
-  initialInput?: Record<string, string> | null;
-};
-
-const FIELD_PLACEHOLDERS: Record<string, string> = {
+const DEFAULT_INPUT: Record<string, string> = {
   company_name: "Acme GmbH",
-  country: "Select country",
+  country: "Germany",
   tax_id: "DE123456789",
-  risk_level: "Select risk level"
+  risk_level: "medium"
 };
+
+const DEMO_APPROVAL_KEY = "demo:approvals";
 
 function labelForField(field: string): string {
   return field
     .split("_")
-    .map((part) => `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`)
+    .map((p) => `${p[0].toUpperCase()}${p.slice(1)}`)
     .join(" ");
 }
 
-function normalizeToolsResponse(value: unknown): DashboardTool[] {
-  const response = value as Partial<ToolsResponse>;
-  return Array.isArray(response.tools) ? response.tools : [];
+function randomId(prefix: string) {
+  return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function ToolInvoker({ onResult, initialInput }: ToolInvokerProps = {}) {
-  const [tool, setTool] = useState<DashboardTool | null>(null);
-  const [input, setInput] = useState<Record<string, string>>({});
+function statusBadgeClass(status: string): string {
+  if (status === "completed" || status === "approved") return "badge badge-completed";
+  if (status === "failed" || status === "rejected") return "badge badge-error";
+  if (status === "awaiting_approval" || status === "pending") return "badge badge-pending";
+  if (status === "running") return "badge badge-running";
+  return "badge";
+}
+
+export function ToolInvoker() {
+  const [input, setInput] = useState<Record<string, string>>(DEFAULT_INPUT);
   const [result, setResult] = useState<InvokeResult | null>(null);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadTool() {
-      try {
-        const response = await fetch("/api/tools", { cache: "no-store" });
-        const tools = normalizeToolsResponse(await response.json());
-        const defaultTool = tools.find(
-          (candidate) => candidate.name === "create_vendor"
-        );
-
-        if (!cancelled) {
-          setTool(defaultTool ?? null);
-          setError(
-            defaultTool
-              ? null
-              : { error: { code: "not_found", message: "Tool not found" } }
-          );
-        }
-      } catch {
-        if (!cancelled) {
-          setError({
-            error: {
-              code: "request_failed",
-              message: "Could not load tools"
-            }
-          });
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    void loadTool();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (initialInput) {
-      setInput(initialInput);
-    }
-  }, [initialInput]);
-
   const fields = useMemo(
-    () => Object.entries(tool?.inputSchema.properties ?? {}),
-    [tool]
-  );
-  const requiredFields = useMemo(
-    () => new Set(tool?.inputSchema.required ?? []),
-    [tool]
+    () => Object.entries(MOCK_TOOL.inputSchema.properties),
+    []
   );
 
   async function invoke() {
-    if (!tool) {
-      return;
-    }
-
     setSubmitting(true);
     setResult(null);
-    setError(null);
 
+    // Simulate network latency
+    await new Promise((r) => setTimeout(r, 1400));
+
+    const runId = randomId("run");
+    const approvalId = randomId("appr");
+
+    // Write mock approval into sessionStorage for ApprovalInbox to pick up
     try {
-      const response = await fetch(`/api/tools/${tool.id}/runs`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input })
-      });
-      const payload = (await response.json()) as InvokeResult | ApiError;
-
-      if (!response.ok || "error" in payload) {
-        setError(payload as ApiError);
-        return;
-      }
-
-      if (onResult) {
-        onResult(payload);
-      } else {
-        setResult(payload);
-      }
+      const existing: unknown[] = JSON.parse(
+        sessionStorage.getItem(DEMO_APPROVAL_KEY) ?? "[]"
+      );
+      const newApproval = {
+        id: approvalId,
+        runId,
+        toolName: MOCK_TOOL.name,
+        stepId: "submit-vendor-form",
+        prompt: "Agent wants to submit vendor registration",
+        payload: {
+          input: { ...input },
+          resolvedElement: "#submit-btn"
+        },
+        status: "pending"
+      };
+      sessionStorage.setItem(
+        DEMO_APPROVAL_KEY,
+        JSON.stringify([...existing, newApproval])
+      );
     } catch {
-      setError({
-        error: {
-          code: "request_failed",
-          message: "Could not invoke the tool"
-        }
-      });
-    } finally {
-      setSubmitting(false);
+      // sessionStorage unavailable (SSR guard)
     }
+
+    setResult({
+      run_id: runId,
+      status: "awaiting_approval",
+      validation: null,
+      approval: { id: approvalId, status: "pending" }
+    });
+
+    setSubmitting(false);
   }
 
   return (
     <div className="tool-invoker">
       <div className="section-heading">
-        <h2>Vendor workflow</h2>
-        <span>review fields</span>
+        <h2>Invoke tool</h2>
+        <span>{MOCK_TOOL.name}</span>
       </div>
 
-      {loading ? <p className="muted">Loading tool</p> : null}
+      <form
+        className="invoke-form"
+        onSubmit={(e) => { e.preventDefault(); void invoke(); }}
+      >
+        {fields.map(([field, property]) => (
+          <label key={field}>
+            <span>{labelForField(field)}</span>
+            {property.enum ? (
+              <select
+                value={input[field] ?? ""}
+                onChange={(e) =>
+                  setInput((cur) => ({ ...cur, [field]: e.target.value }))
+                }
+              >
+                {property.enum.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value={input[field] ?? ""}
+                onChange={(e) =>
+                  setInput((cur) => ({ ...cur, [field]: e.target.value }))
+                }
+              />
+            )}
+          </label>
+        ))}
 
-      {fields.length > 0 ? (
-        <form
-          className="invoke-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void invoke();
-          }}
-        >
-          {fields.map(([field, property]) => (
-            <label key={field}>
-              <span>{labelForField(field)}</span>
-              {property.enum ? (
-                <select
-                  required={requiredFields.has(field)}
-                  value={input[field] ?? ""}
-                  onChange={(event) =>
-                    setInput((current) => ({ ...current, [field]: event.target.value }))
-                  }
-                >
-                  <option value="" disabled>
-                    {FIELD_PLACEHOLDERS[field] ?? `Select ${labelForField(field)}`}
-                  </option>
-                  {property.enum.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  required={requiredFields.has(field)}
-                  placeholder={FIELD_PLACEHOLDERS[field] ?? labelForField(field)}
-                  value={input[field] ?? ""}
-                  onChange={(event) =>
-                    setInput((current) => ({ ...current, [field]: event.target.value }))
-                  }
-                />
-              )}
-            </label>
-          ))}
-
-          <button type="submit" disabled={submitting || !tool}>
-            {submitting ? "Running" : "Run workflow"}
-          </button>
-        </form>
-      ) : null}
+        <button type="submit" disabled={submitting}>
+          {submitting ? "Running workflow…" : "Run tool"}
+        </button>
+      </form>
 
       {result ? (
         <div className="invoke-result" role="status">
-          <h3>{result.status}</h3>
-          <p>
-            Validation:{" "}
-            {result.validation
-              ? result.validation.passed
-                ? "passed"
-                : "failed"
-              : "not run"}
-          </p>
-          {result.approval ? <p>Approval: {result.approval.status}</p> : null}
-          <a href={`/runs/${result.run_id}`}>Open evidence</a>
+          <div className="result-badges">
+            <span className={statusBadgeClass(result.status)}>{result.status}</span>
+            {result.validation ? (
+              <span className={`badge ${result.validation.passed ? "badge-ok" : "badge-error"}`}>
+                {result.validation.passed ? "Validated ✓" : "Validation failed"}
+              </span>
+            ) : null}
+            {result.approval ? (
+              <span className="badge badge-pending">
+                Approval pending — check inbox ↓
+              </span>
+            ) : null}
+          </div>
+          <a className="evidence-link" href={`/runs/${result.run_id}`}>
+            Open evidence trail →
+          </a>
         </div>
-      ) : null}
-
-      {error ? (
-        <pre className="result error" role="alert">
-          {JSON.stringify(error, null, 2)}
-        </pre>
       ) : null}
     </div>
   );

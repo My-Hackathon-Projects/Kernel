@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "dev": "WATCHPACK_POLLING=true next dev --port ${DASHBOARD_PORT:-3000}",
+    "dev": "next dev --port 3000",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
