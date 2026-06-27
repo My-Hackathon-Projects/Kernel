@@ -475,6 +475,7 @@ main {
 /* Product action buttons inside white panels (the machine acts = cyan/blue) */
 .patch-review button,
 .invoke-form button,
+.vendor-intake button,
 .validator button {
   display: inline-flex;
   align-items: center;
@@ -494,8 +495,27 @@ main {
 
 .patch-review button:hover,
 .invoke-form button:hover,
+.vendor-intake button:hover,
 .validator button:hover {
   transform: translateY(-1px);
+}
+
+.vendor-intake button.secondary {
+  background: #f1f5f9;
+  color: #475569;
+  box-shadow: none;
+}
+
+.approval-toolbar button,
+.reset-demo {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #f1f5f9;
+  color: #475569;
+  cursor: pointer;
+  font-weight: 800;
+  height: 44px;
+  padding: 0 14px;
 }
 
 /* The human approval moment = amber */
@@ -516,8 +536,11 @@ main {
 }
 
 .approval-actions button:disabled,
+.approval-toolbar button:disabled,
 .patch-review button:disabled,
 .invoke-form button:disabled,
+.reset-demo:disabled,
+.vendor-intake button:disabled,
 .validator button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -528,9 +551,21 @@ main {
 .approval-inbox,
 .patch-review,
 .tool-invoker,
+.vendor-intake,
 .validator {
   display: grid;
   gap: 18px;
+}
+
+.intake-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.approval-toolbar {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .invoke-form {
@@ -538,11 +573,13 @@ main {
   gap: 14px;
 }
 
+.source-text,
 .invoke-form label {
   display: grid;
   gap: 6px;
 }
 
+.source-text span,
 .invoke-form label span,
 .run-meta dt,
 .step-meta dt {
@@ -566,6 +603,24 @@ main {
 .invoke-form select:focus,
 .validator textarea:focus,
 .runs-filter input:focus {
+  outline: 2px solid var(--agent-2);
+  outline-offset: 1px;
+}
+
+.source-text textarea {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel-muted);
+  color: var(--ink);
+  font-family: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  font-size: 13px;
+  min-height: 160px;
+  padding: 14px;
+  resize: vertical;
+  width: 100%;
+}
+
+.source-text textarea:focus {
   outline: 2px solid var(--agent-2);
   outline-offset: 1px;
 }
@@ -612,6 +667,46 @@ main {
 .result.error {
   background: #fdecec;
   color: #7a1e1e;
+}
+
+.result.error p {
+  margin: 0;
+}
+
+.result.error ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.intake-result {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--panel-muted);
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.intake-result h3 {
+  margin: 0;
+}
+
+.intake-preview {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin: 0;
+}
+
+.intake-preview dt {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.intake-preview dd {
+  margin: 3px 0 0;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
 }
 
 .invoke-result {
@@ -759,6 +854,19 @@ main {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.technical-details {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.technical-details summary {
+  color: var(--agent-2);
+  cursor: pointer;
+  font-weight: 800;
 }
 
 /* ------------------------------------------------------------------- Steps */

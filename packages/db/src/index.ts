@@ -18,6 +18,7 @@ export {
   createScreenshotArtifact,
   createTraceEvent,
   createValidation,
+  deleteAllRuns,
   decideApprovalRequest,
   deleteRun,
   ensureRunForExecution,
@@ -32,6 +33,7 @@ export {
   markRunStepAwaitingApproval,
   markRunStepRejected,
   markRunStarted,
+  rejectApprovalWithoutResume,
   type RunDetail
 } from "./runs";
 export {

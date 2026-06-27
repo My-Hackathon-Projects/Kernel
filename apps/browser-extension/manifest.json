@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "AgentPort Demo Intake",
+  "version": "0.1.0",
+  "description": "Extract vendor details from the current page and open AgentPort with the workflow prefilled.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AgentPort"
+  },
+  "permissions": ["activeTab", "tabs"],
+  "host_permissions": ["http://localhost:3000/*"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"]
+    }
+  ]
+}

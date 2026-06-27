@@ -22,6 +22,13 @@ export {
 } from "./vendor";
 
 export {
+  extractCreateVendorInput,
+  type VendorIntakeFailure,
+  type VendorIntakeResult,
+  type VendorIntakeSuccess
+} from "./vendor-intake";
+
+export {
   createVendorWorkflowFixture,
   executeRequestSchema,
   parseExecuteRequest,

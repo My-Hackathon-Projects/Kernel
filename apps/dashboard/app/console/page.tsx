@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { ApprovalInbox } from "../../components/approval-inbox";
-import { ToolInvoker } from "../../components/tool-invoker";
+import { ConsoleWorkspace } from "../../components/console-workspace";
 
 export default function ConsolePage() {
   return (
@@ -14,18 +13,13 @@ export default function ConsolePage() {
             <p className="eyebrow">Operate</p>
             <h1>Console</h1>
             <p className="muted">
-              Call a compiled tool and approve the write action when the run pauses.
+              Extract vendor details, run the portal workflow, approve the submit, and
+              open the evidence record.
             </p>
           </div>
         </section>
 
-        <section className="panel">
-          <ToolInvoker />
-        </section>
-
-        <section className="panel">
-          <ApprovalInbox />
-        </section>
+        <ConsoleWorkspace />
       </div>
     </main>
   );

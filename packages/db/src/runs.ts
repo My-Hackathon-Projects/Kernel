@@ -85,6 +85,25 @@ export async function deleteRun(
   });
 }
 
+export async function deleteAllRuns(prisma: PrismaClient): Promise<string[]> {
+  return prisma.$transaction(async (tx) => {
+    const artifacts = await tx.artifact.findMany({
+      select: { uri: true }
+    });
+
+    await tx.auditEvent.deleteMany({});
+    await tx.selectorPatch.deleteMany({});
+    await tx.run.deleteMany({});
+    await tx.counter.upsert({
+      where: { id: "run" },
+      create: { id: "run", value: RUN_SEQ_BASE },
+      update: { value: RUN_SEQ_BASE }
+    });
+
+    return artifacts.map((artifact) => artifact.uri);
+  });
+}
+
 export async function ensureRunForExecution(
   prisma: PrismaClient,
   params: {
@@ -424,6 +443,95 @@ export async function decideApprovalRequest(
       decidedBy: params.decidedBy,
       decidedAt: new Date()
     }
+  });
+}
+
+export async function rejectApprovalWithoutResume(
+  prisma: PrismaClient,
+  params: {
+    approvalId: string;
+    decidedBy: string;
+    reason: string;
+  }
+): Promise<{ approvalId: string; runId: string } | null> {
+  return prisma.$transaction(async (tx) => {
+    const approval = await tx.approvalRequest.findUnique({
+      where: { id: params.approvalId },
+      select: {
+        id: true,
+        runId: true,
+        stepId: true,
+        status: true
+      }
+    });
+
+    if (!approval || approval.status !== "pending") {
+      return null;
+    }
+
+    await tx.approvalRequest.update({
+      where: { id: approval.id },
+      data: {
+        status: "rejected",
+        decidedBy: params.decidedBy,
+        decidedAt: new Date()
+      }
+    });
+
+    const pendingStep = await tx.runStep.findFirst({
+      where: {
+        runId: approval.runId,
+        stepId: approval.stepId,
+        status: "awaiting_approval"
+      },
+      orderBy: { createdAt: "desc" }
+    });
+
+    if (pendingStep) {
+      await tx.runStep.update({
+        where: { id: pendingStep.id },
+        data: { status: "rejected" }
+      });
+    }
+
+    await tx.run.update({
+      where: { id: approval.runId },
+      data: {
+        status: "rejected",
+        error: params.reason,
+        finishedAt: new Date()
+      }
+    });
+
+    await tx.auditEvent.create({
+      data: {
+        workspaceId: DEMO_WORKSPACE_ID,
+        runId: approval.runId,
+        type: "approval_decided",
+        data: {
+          approvalId: approval.id,
+          decision: "reject",
+          fallback: "dashboard_without_live_runner"
+        }
+      }
+    });
+
+    await tx.auditEvent.create({
+      data: {
+        workspaceId: DEMO_WORKSPACE_ID,
+        runId: approval.runId,
+        type: "run_finished",
+        data: {
+          status: "rejected",
+          reason: params.reason
+        }
+      }
+    });
+
+    return {
+      approvalId: approval.id,
+      runId: approval.runId
+    };
   });
 }
 

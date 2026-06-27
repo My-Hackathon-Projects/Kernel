@@ -61,6 +61,7 @@ export function RunsTable({ rows }: { rows: RunRow[] }) {
   const [sortKey, setSortKey] = useState<SortKey>("run");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resetting, setResetting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const visible = useMemo(() => {
@@ -110,6 +111,28 @@ export function RunsTable({ rows }: { rows: RunRow[] }) {
     }
   }
 
+  async function resetDemoData() {
+    if (!window.confirm("Clear demo runs, pending approvals, and evidence?")) {
+      return;
+    }
+
+    setResetting(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/runs", { method: "DELETE" });
+      if (!response.ok) {
+        setError("Could not reset demo data");
+        return;
+      }
+
+      setRuns([]);
+    } catch {
+      setError("Could not reset demo data");
+    } finally {
+      setResetting(false);
+    }
+  }
+
   function arrow(key: SortKey): string {
     if (key !== sortKey) {
       return "";
@@ -132,6 +155,14 @@ export function RunsTable({ rows }: { rows: RunRow[] }) {
         <span className="runs-count">
           {visible.length} of {runs.length}
         </span>
+        <button
+          type="button"
+          className="reset-demo"
+          disabled={resetting || runs.length === 0}
+          onClick={() => void resetDemoData()}
+        >
+          {resetting ? "Resetting" : "Reset demo data"}
+        </button>
       </div>
 
       {error ? <p className="form-error">{error}</p> : null}

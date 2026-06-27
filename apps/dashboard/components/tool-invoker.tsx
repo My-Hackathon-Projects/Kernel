@@ -20,7 +20,7 @@ type ToolsResponse = {
   tools: DashboardTool[];
 };
 
-type InvokeResult = {
+export type InvokeResult = {
   run_id: string;
   status: string;
   evidence_url: string;
@@ -42,6 +42,11 @@ type ApiError = {
   };
 };
 
+type ToolInvokerProps = {
+  onResult?: (result: InvokeResult) => void;
+  initialInput?: Record<string, string> | null;
+};
+
 const FIELD_PLACEHOLDERS: Record<string, string> = {
   company_name: "Acme GmbH",
   country: "Select country",
@@ -61,7 +66,7 @@ function normalizeToolsResponse(value: unknown): DashboardTool[] {
   return Array.isArray(response.tools) ? response.tools : [];
 }
 
-export function ToolInvoker() {
+export function ToolInvoker({ onResult, initialInput }: ToolInvokerProps = {}) {
   const [tool, setTool] = useState<DashboardTool | null>(null);
   const [input, setInput] = useState<Record<string, string>>({});
   const [result, setResult] = useState<InvokeResult | null>(null);
@@ -111,6 +116,12 @@ export function ToolInvoker() {
     };
   }, []);
 
+  useEffect(() => {
+    if (initialInput) {
+      setInput(initialInput);
+    }
+  }, [initialInput]);
+
   const fields = useMemo(
     () => Object.entries(tool?.inputSchema.properties ?? {}),
     [tool]
@@ -142,7 +153,11 @@ export function ToolInvoker() {
         return;
       }
 
-      setResult(payload);
+      if (onResult) {
+        onResult(payload);
+      } else {
+        setResult(payload);
+      }
     } catch {
       setError({
         error: {
@@ -158,8 +173,8 @@ export function ToolInvoker() {
   return (
     <div className="tool-invoker">
       <div className="section-heading">
-        <h2>Test Invoke</h2>
-        <span>{tool?.name ?? "create_vendor"}</span>
+        <h2>Vendor workflow</h2>
+        <span>review fields</span>
       </div>
 
       {loading ? <p className="muted">Loading tool</p> : null}
@@ -206,7 +221,7 @@ export function ToolInvoker() {
           ))}
 
           <button type="submit" disabled={submitting || !tool}>
-            {submitting ? "Invoking" : "Run tool"}
+            {submitting ? "Running" : "Run workflow"}
           </button>
         </form>
       ) : null}

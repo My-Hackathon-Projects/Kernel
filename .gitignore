@@ -13,6 +13,7 @@ dist/
 build/
 out/
 .next/
+.next-e2e/
 .turbo/
 *.tsbuildinfo
 next-env.d.ts

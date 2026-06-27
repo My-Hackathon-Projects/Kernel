@@ -5,10 +5,12 @@ export default tseslint.config(
   {
     ignores: [
       ".next/**",
+      ".next-e2e/**",
       ".cache/**",
       ".tmp/**",
       ".turbo/**",
       "**/.next/**",
+      "**/.next-e2e/**",
       "**/.turbo/**",
       "coverage/**",
       "dist/**",

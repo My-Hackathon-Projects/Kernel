@@ -9,8 +9,10 @@ import {
 import {
   getApprovalRequest,
   getPrismaClient,
-  listApprovalRequests
+  listApprovalRequests,
+  rejectApprovalWithoutResume
 } from "@agentport/db";
+import { resolveDashboardConfig } from "./config";
 import { postRunnerJson } from "./runner-client";
 
 export type ApprovalSummary = {
@@ -46,6 +48,28 @@ function toApprovalSummary(
 export async function getApprovals(status = "pending"): Promise<ApprovalSummary[]> {
   const approvals = await listApprovalRequests(getPrismaClient(), { status });
   return approvals.map(toApprovalSummary);
+}
+
+function evidenceUrl(runId: string): string {
+  return `${resolveDashboardConfig().dashboardBaseUrl}/runs/${runId}`;
+}
+
+function staleRejectedResult(params: {
+  runId: string;
+  approvalId: string;
+}): RunnerExecuteResult {
+  return {
+    runId: params.runId,
+    status: "rejected",
+    steps: [],
+    artifacts: [],
+    approval: {
+      id: params.approvalId,
+      status: "rejected"
+    },
+    validation: null,
+    evidenceUrl: evidenceUrl(params.runId)
+  };
 }
 
 export async function decideApproval(params: {
@@ -88,6 +112,21 @@ export async function decideApproval(params: {
   });
 
   if (!runnerResult.success) {
+    if (parsedDecision.data === "reject") {
+      const rejected = await rejectApprovalWithoutResume(getPrismaClient(), {
+        approvalId: approval.id,
+        decidedBy: "dashboard",
+        reason: "Approval rejected"
+      });
+
+      if (rejected) {
+        return {
+          success: true,
+          result: staleRejectedResult(rejected)
+        };
+      }
+    }
+
     return {
       success: false,
       status: 502,

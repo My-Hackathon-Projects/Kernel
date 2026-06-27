@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { deleteRun } from "../src/runs";
+import { deleteAllRuns, deleteRun } from "../src/runs";
 
 type RunStub = {
   id: string;
@@ -33,6 +33,45 @@ function createPrismaStub(initialRuns: RunStub[]) {
             ) ?? null
         }
       }))
+    },
+    counter: {
+      upsert: vi.fn(
+        async ({
+          create,
+          update
+        }: {
+          create: { value: number };
+          update: { value: number };
+        }) => {
+          counterValue = update.value ?? create.value;
+          return { id: "run", value: counterValue };
+        }
+      )
+    }
+  };
+  const prisma = {
+    $transaction: vi.fn(async (callback: (transaction: typeof tx) => unknown) =>
+      callback(tx)
+    )
+  };
+
+  return { prisma, tx, getCounterValue: () => counterValue };
+}
+
+function createResetPrismaStub(artifactUris: string[]) {
+  let counterValue: number | null = null;
+  const tx = {
+    artifact: {
+      findMany: vi.fn(async () => artifactUris.map((uri) => ({ uri })))
+    },
+    auditEvent: {
+      deleteMany: vi.fn(async () => ({ count: 2 }))
+    },
+    selectorPatch: {
+      deleteMany: vi.fn(async () => ({ count: 1 }))
+    },
+    run: {
+      deleteMany: vi.fn(async () => ({ count: 3 }))
     },
     counter: {
       upsert: vi.fn(
@@ -94,5 +133,25 @@ describe("deleteRun", () => {
     expect(artifactUris).toBeNull();
     expect(tx.counter.upsert).not.toHaveBeenCalled();
     expect(getCounterValue()).toBeNull();
+  });
+});
+
+describe("deleteAllRuns", () => {
+  it("deletes demo run records and resets the run counter", async () => {
+    const { prisma, tx, getCounterValue } = createResetPrismaStub([
+      "/tmp/artifacts/run_1/s1.png",
+      "/tmp/artifacts/run_2/s1.png"
+    ]);
+
+    const artifactUris = await deleteAllRuns(prisma as never);
+
+    expect(artifactUris).toEqual([
+      "/tmp/artifacts/run_1/s1.png",
+      "/tmp/artifacts/run_2/s1.png"
+    ]);
+    expect(tx.auditEvent.deleteMany).toHaveBeenCalledWith({});
+    expect(tx.selectorPatch.deleteMany).toHaveBeenCalledWith({});
+    expect(tx.run.deleteMany).toHaveBeenCalledWith({});
+    expect(getCounterValue()).toBe(100000);
   });
 });

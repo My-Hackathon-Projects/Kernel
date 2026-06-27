@@ -1,5 +1,6 @@
 import { unlink } from "node:fs/promises";
 import {
+  deleteAllRuns,
   deleteRun,
   getPrismaClient,
   getRunDetail,
@@ -26,4 +27,9 @@ export async function deleteRunById(runId: string): Promise<boolean> {
 
   await Promise.all(artifactUris.map((uri) => unlink(uri).catch(() => undefined)));
   return true;
+}
+
+export async function resetRunData(): Promise<void> {
+  const artifactUris = await deleteAllRuns(getPrismaClient());
+  await Promise.all(artifactUris.map((uri) => unlink(uri).catch(() => undefined)));
 }
