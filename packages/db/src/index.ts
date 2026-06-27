@@ -13,14 +13,23 @@ export {
 export {
   completeRunStep,
   createAuditEvent,
+  createApprovalRequest,
   createRunForTool,
   createRunStep,
   createScreenshotArtifact,
+  createTraceEvent,
   createValidation,
+  decideApprovalRequest,
   ensureRunForExecution,
   failRunStep,
+  getApprovalRequest,
   getRunDetail,
+  listApprovalRequests,
+  listAuditEventsForRun,
+  markRunAwaitingApproval,
   markRunFinished,
+  markRunStepAwaitingApproval,
+  markRunStepRejected,
   markRunStarted,
   type RunDetail
 } from "./runs";

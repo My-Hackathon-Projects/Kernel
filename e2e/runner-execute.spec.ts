@@ -30,19 +30,42 @@ test("runner executes a workflow and records step evidence", async ({
   expect(response.status()).toBe(200);
   const result = (await response.json()) as {
     status: string;
+    approval: { id: string } | null;
     steps: unknown[];
     artifacts: unknown[];
   };
-  expect(result.status).toBe("succeeded");
-  expect(result.steps).toHaveLength(8);
-  expect(result.artifacts).toHaveLength(8);
+  expect(result.status).toBe("awaiting_approval");
+  expect(result.approval?.id).toBeTruthy();
+  expect(result.steps).toHaveLength(7);
+  expect(result.artifacts).toHaveLength(7);
+
+  const resumeResponse = await request.post(`${runnerUrl}/resume`, {
+    data: {
+      runId,
+      approvalId: result.approval?.id,
+      decision: "approve"
+    }
+  });
+  const resumeResult = (await resumeResponse.json()) as {
+    status: string;
+    validation: { passed: boolean } | null;
+    steps: unknown[];
+    artifacts: unknown[];
+  };
+
+  expect(resumeResponse.status()).toBe(200);
+  expect(resumeResult.status).toBe("succeeded");
+  expect(resumeResult.validation?.passed).toBe(true);
+  expect(resumeResult.steps).toHaveLength(8);
+  expect(resumeResult.artifacts).toHaveLength(9);
 
   const runResponse = await request.get(`${dashboardUrl}/api/runs/${runId}`);
   expect(runResponse.status()).toBe(200);
   await expect(runResponse.json()).resolves.toMatchObject({
     run: {
       id: runId,
-      status: "succeeded"
+      status: "succeeded",
+      validations: [{ passed: true }]
     }
   });
 
@@ -50,4 +73,60 @@ test("runner executes a workflow and records step evidence", async ({
     `${mockPortalUrl}/api/vendors?company_name=${encodeURIComponent(companyName)}`
   );
   expect(vendorResponse.status()).toBe(200);
+});
+
+test("runner records validation failure separately from browser failure", async ({
+  request
+}, testInfo) => {
+  const runId = `run_validation_fail_${testInfo.workerIndex}_${Date.now()}`;
+  const companyName = uniqueCompanyName("Validation Fail Vendor", testInfo);
+  const workflow = createVendorWorkflowFixture();
+  workflow.validation.expect = { status: "Approved" };
+
+  const response = await request.post(`${runnerUrl}/execute`, {
+    data: {
+      runId,
+      workflow,
+      input: {
+        company_name: companyName,
+        country: "Germany",
+        tax_id: "DE123456789",
+        risk_level: "medium"
+      }
+    }
+  });
+  const result = (await response.json()) as {
+    approval: { id: string } | null;
+  };
+
+  expect(response.status()).toBe(200);
+  expect(result.approval?.id).toBeTruthy();
+
+  const resumeResponse = await request.post(`${runnerUrl}/resume`, {
+    data: {
+      runId,
+      approvalId: result.approval?.id,
+      decision: "approve"
+    }
+  });
+  const resumeResult = (await resumeResponse.json()) as {
+    status: string;
+    validation: { passed: boolean; reason?: string } | null;
+  };
+
+  expect(resumeResponse.status()).toBe(200);
+  expect(resumeResult.status).toBe("validation_failed");
+  expect(resumeResult.validation).toMatchObject({
+    passed: false,
+    reason: "Expected status to equal Approved"
+  });
+
+  const runResponse = await request.get(`${dashboardUrl}/api/runs/${runId}`);
+  expect(runResponse.status()).toBe(200);
+  await expect(runResponse.json()).resolves.toMatchObject({
+    run: {
+      status: "validation_failed",
+      validations: [{ passed: false }]
+    }
+  });
 });

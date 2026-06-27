@@ -1,5 +1,7 @@
 import {
+  type ApprovalDecision,
   type RunStatus,
+  type TraceEvent,
   type ValidationResult,
   type WorkflowDefinition,
   type WorkflowInput
@@ -77,7 +79,10 @@ export async function markRunFinished(
   prisma: PrismaClient,
   params: {
     runId: string;
-    status: Extract<RunStatus, "succeeded" | "failed">;
+    status: Extract<
+      RunStatus,
+      "succeeded" | "validation_failed" | "rejected" | "failed"
+    >;
     error?: string;
   }
 ) {
@@ -87,6 +92,15 @@ export async function markRunFinished(
       status: params.status,
       error: params.error ?? null,
       finishedAt: new Date()
+    }
+  });
+}
+
+export async function markRunAwaitingApproval(prisma: PrismaClient, runId: string) {
+  return prisma.run.update({
+    where: { id: runId },
+    data: {
+      status: "awaiting_approval"
     }
   });
 }
@@ -129,6 +143,46 @@ export async function completeRunStep(
       durationMs: params.durationMs,
       screenshotId: params.screenshotId ?? null,
       status: "succeeded"
+    }
+  });
+}
+
+export async function markRunStepAwaitingApproval(
+  prisma: PrismaClient,
+  params: {
+    id: string;
+    selector?: string;
+    resolvedValue?: string;
+    resolvedTier?: number;
+    durationMs: number;
+    screenshotId?: string;
+  }
+) {
+  return prisma.runStep.update({
+    where: { id: params.id },
+    data: {
+      selector: params.selector ?? null,
+      resolvedValue: params.resolvedValue ?? null,
+      resolvedTier: params.resolvedTier ?? null,
+      durationMs: params.durationMs,
+      screenshotId: params.screenshotId ?? null,
+      status: "awaiting_approval"
+    }
+  });
+}
+
+export async function markRunStepRejected(
+  prisma: PrismaClient,
+  params: {
+    id: string;
+    durationMs: number;
+  }
+) {
+  return prisma.runStep.update({
+    where: { id: params.id },
+    data: {
+      durationMs: params.durationMs,
+      status: "rejected"
     }
   });
 }
@@ -205,6 +259,91 @@ export async function createAuditEvent(
   });
 }
 
+export async function createTraceEvent(prisma: PrismaClient, event: TraceEvent) {
+  return createAuditEvent(prisma, {
+    runId: event.runId,
+    type: event.type,
+    data: event
+  });
+}
+
+export async function listAuditEventsForRun(prisma: PrismaClient, runId: string) {
+  return prisma.auditEvent.findMany({
+    where: { runId },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }]
+  });
+}
+
+export async function createApprovalRequest(
+  prisma: PrismaClient,
+  params: {
+    runId: string;
+    stepId: string;
+    prompt: string;
+    payload: unknown;
+  }
+) {
+  return prisma.approvalRequest.create({
+    data: {
+      runId: params.runId,
+      stepId: params.stepId,
+      prompt: params.prompt,
+      payload: toJsonValue(params.payload),
+      status: "pending"
+    }
+  });
+}
+
+export async function getApprovalRequest(prisma: PrismaClient, approvalId: string) {
+  return prisma.approvalRequest.findUnique({
+    where: { id: approvalId },
+    include: {
+      run: {
+        include: {
+          tool: true
+        }
+      }
+    }
+  });
+}
+
+export async function listApprovalRequests(
+  prisma: PrismaClient,
+  params: {
+    status?: string;
+  } = {}
+) {
+  return prisma.approvalRequest.findMany({
+    where: params.status ? { status: params.status } : {},
+    orderBy: { createdAt: "asc" },
+    include: {
+      run: {
+        include: {
+          tool: true
+        }
+      }
+    }
+  });
+}
+
+export async function decideApprovalRequest(
+  prisma: PrismaClient,
+  params: {
+    approvalId: string;
+    decision: ApprovalDecision;
+    decidedBy: string;
+  }
+) {
+  return prisma.approvalRequest.update({
+    where: { id: params.approvalId },
+    data: {
+      status: params.decision === "approve" ? "approved" : "rejected",
+      decidedBy: params.decidedBy,
+      decidedAt: new Date()
+    }
+  });
+}
+
 export async function getRunDetail(prisma: PrismaClient, runId: string) {
   return prisma.run.findUnique({
     where: { id: runId },
@@ -225,6 +364,9 @@ export async function getRunDetail(prisma: PrismaClient, runId: string) {
         orderBy: { createdAt: "asc" }
       },
       validations: {
+        orderBy: { createdAt: "asc" }
+      },
+      approvals: {
         orderBy: { createdAt: "asc" }
       }
     }

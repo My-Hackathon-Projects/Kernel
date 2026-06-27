@@ -1,7 +1,5 @@
 import {
   apiError,
-  getApiErrorMessage,
-  isApiErrorBody,
   parseWorkflowInput,
   runnerExecuteResultSchema,
   toolInvokeResultSchema,
@@ -13,17 +11,15 @@ import {
   CREATE_VENDOR_TOOL_ID,
   createAuditEvent,
   createRunForTool,
-  createValidation,
   ensureCreateVendorTool,
   getPrismaClient,
   getRunDetail,
   getToolWithWorkflow,
   listEnabledTools,
-  markRunFinished,
   parseStoredWorkflow
 } from "@agentport/db";
 import { resolveDashboardConfig } from "./config";
-import { validateWorkflowResult } from "./validation";
+import { postRunnerJson } from "./runner-client";
 
 export type DashboardTool = {
   id: string;
@@ -76,25 +72,6 @@ async function ensureDefaultTool() {
   });
 }
 
-async function readJsonResponse(response: Response): Promise<unknown> {
-  const text = await response.text();
-  if (text.length === 0) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    return text;
-  }
-}
-
-function runnerFailure(body: unknown, fallback: string): ApiErrorBody {
-  return isApiErrorBody(body)
-    ? body
-    : apiError("execution_failed", getApiErrorMessage(body, fallback));
-}
-
 function evidenceUrl(runId: string): string {
   return `${resolveDashboardConfig().dashboardBaseUrl}/runs/${runId}`;
 }
@@ -133,34 +110,7 @@ async function callRunner(params: {
 }): Promise<
   { success: true; data: unknown } | { success: false; error: ApiErrorBody }
 > {
-  const config = resolveDashboardConfig();
-
-  try {
-    const response = await fetch(`${config.runnerBaseUrl}/execute`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
-      cache: "no-store"
-    });
-    const body = await readJsonResponse(response);
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: runnerFailure(body, `Runner returned ${response.status}`)
-      };
-    }
-
-    return { success: true, data: body };
-  } catch (error) {
-    return {
-      success: false,
-      error: apiError(
-        "runner_unavailable",
-        error instanceof Error ? error.message : "Runner request failed"
-      )
-    };
-  }
+  return postRunnerJson({ path: "/execute", body: params });
 }
 
 export async function invokeTool(params: {
@@ -210,11 +160,6 @@ export async function invokeTool(params: {
   });
 
   if (!runnerResult.success) {
-    await markRunFinished(prisma, {
-      runId: run.id,
-      status: "failed",
-      error: runnerResult.error.error.message
-    });
     await createAuditEvent(prisma, {
       runId: run.id,
       type: "runner_failed",
@@ -230,12 +175,6 @@ export async function invokeTool(params: {
 
   const parsedRunnerResult = runnerExecuteResultSchema.safeParse(runnerResult.data);
   if (!parsedRunnerResult.success) {
-    await markRunFinished(prisma, {
-      runId: run.id,
-      status: "failed",
-      error: "Runner response did not match the execution contract"
-    });
-
     return {
       success: false,
       status: 502,
@@ -243,39 +182,23 @@ export async function invokeTool(params: {
     };
   }
 
-  const validation = await validateWorkflowResult({
-    workflow,
-    input: parsedInput.data,
-    targetBaseUrl: tool.workflow.target.baseUrl
-  });
-
-  await createValidation(prisma, {
-    runId: run.id,
-    type: workflow.validation.type,
-    result: validation
-  });
-
-  const status = validation.passed ? parsedRunnerResult.data.status : "failed";
-  if (!validation.passed) {
-    await markRunFinished(prisma, {
-      runId: run.id,
-      status: "failed",
-      error: validation.reason ?? "Validation failed"
-    });
-  }
-
   await createAuditEvent(prisma, {
     runId: run.id,
-    type: validation.passed ? "validation_passed" : "validation_failed",
-    data: validation
+    type: "runner_completed",
+    data: {
+      status: parsedRunnerResult.data.status,
+      approval: parsedRunnerResult.data.approval,
+      validation: parsedRunnerResult.data.validation
+    }
   });
 
   return {
     success: true,
     result: toolInvokeResultSchema.parse({
       run_id: run.id,
-      status,
-      validation,
+      status: parsedRunnerResult.data.status,
+      validation: parsedRunnerResult.data.validation,
+      approval: parsedRunnerResult.data.approval,
       evidence_url: evidenceUrl(run.id)
     })
   };

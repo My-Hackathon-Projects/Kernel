@@ -1,15 +1,25 @@
 import { createVendorWorkflowFixture } from "@agentport/core";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildRunner } from "../src/app";
-import { type ExecuteWorkflow } from "../src/execution/workflow-executor";
+import {
+  type ExecuteWorkflow,
+  type ResumeWorkflow
+} from "../src/execution/workflow-executor";
 import { resolveRunnerConfig } from "../src/index";
 
 const apps: Array<ReturnType<typeof buildRunner>> = [];
 
-function createApp(executeWorkflow?: ExecuteWorkflow) {
-  const app = executeWorkflow
-    ? buildRunner({ logger: false, executeWorkflow })
-    : buildRunner({ logger: false });
+function createApp(
+  options: {
+    executeWorkflow?: ExecuteWorkflow;
+    resumeWorkflow?: ResumeWorkflow;
+  } = {}
+) {
+  const app = buildRunner({
+    logger: false,
+    ...(options.executeWorkflow ? { executeWorkflow: options.executeWorkflow } : {}),
+    ...(options.resumeWorkflow ? { resumeWorkflow: options.resumeWorkflow } : {})
+  });
   apps.push(app);
   return app;
 }
@@ -32,16 +42,106 @@ describe("runner scaffold", () => {
     });
   });
 
+  it("resumes a paused workflow after API validation", async () => {
+    const resumeWorkflow: ResumeWorkflow = async (request) => ({
+      runId: request.runId,
+      status: "succeeded",
+      steps: [],
+      artifacts: [],
+      approval: {
+        id: request.approvalId,
+        status: "approved"
+      },
+      validation: {
+        passed: true,
+        expected: { status: "Pending Approval" },
+        actual: { status: "Pending Approval" }
+      },
+      evidenceUrl: `/runs/${request.runId}`
+    });
+
+    const response = await createApp({ resumeWorkflow }).inject({
+      method: "POST",
+      url: "/resume",
+      payload: {
+        runId: "run_123",
+        approvalId: "approval_123",
+        decision: "approve"
+      }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      runId: "run_123",
+      status: "succeeded",
+      approval: {
+        id: "approval_123",
+        status: "approved"
+      },
+      validation: {
+        passed: true
+      }
+    });
+  });
+
+  it("rejects an invalid resume request before resuming", async () => {
+    let resumeStarted = false;
+    const response = await createApp({
+      resumeWorkflow: async () => {
+        resumeStarted = true;
+        throw new Error("Should not resume");
+      }
+    }).inject({
+      method: "POST",
+      url: "/resume",
+      payload: {
+        runId: "run_123",
+        approvalId: "approval_123",
+        decision: "maybe"
+      }
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("validation_failed");
+    expect(resumeStarted).toBe(false);
+  });
+
+  it("returns a typed resume error when the resumer fails", async () => {
+    const response = await createApp({
+      resumeWorkflow: async () => {
+        throw new Error("No pending execution");
+      }
+    }).inject({
+      method: "POST",
+      url: "/resume",
+      payload: {
+        runId: "run_123",
+        approvalId: "approval_123",
+        decision: "approve"
+      }
+    });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.json()).toEqual({
+      error: {
+        code: "resume_failed",
+        message: "No pending execution"
+      }
+    });
+  });
+
   it("executes a valid request after API validation", async () => {
     const executeWorkflow: ExecuteWorkflow = async (request) => ({
       runId: request.runId,
       status: "succeeded",
       steps: [],
       artifacts: [],
+      approval: null,
+      validation: null,
       evidenceUrl: `/runs/${request.runId}`
     });
 
-    const response = await createApp(executeWorkflow).inject({
+    const response = await createApp({ executeWorkflow }).inject({
       method: "POST",
       url: "/execute",
       payload: {
@@ -62,15 +162,19 @@ describe("runner scaffold", () => {
       status: "succeeded",
       steps: [],
       artifacts: [],
+      approval: null,
+      validation: null,
       evidenceUrl: "/runs/run_123"
     });
   });
 
   it("rejects an invalid execute request before execution", async () => {
     let executionStarted = false;
-    const response = await createApp(async () => {
-      executionStarted = true;
-      throw new Error("Should not execute");
+    const response = await createApp({
+      executeWorkflow: async () => {
+        executionStarted = true;
+        throw new Error("Should not execute");
+      }
     }).inject({
       method: "POST",
       url: "/execute",
@@ -94,8 +198,10 @@ describe("runner scaffold", () => {
   });
 
   it("returns a typed execution error when the executor fails", async () => {
-    const response = await createApp(async () => {
-      throw new Error("Target could not be resolved");
+    const response = await createApp({
+      executeWorkflow: async () => {
+        throw new Error("Target could not be resolved");
+      }
     }).inject({
       method: "POST",
       url: "/execute",

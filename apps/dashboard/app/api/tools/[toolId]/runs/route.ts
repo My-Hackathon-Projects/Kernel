@@ -38,5 +38,7 @@ export async function POST(request: Request, context: RouteContext) {
     return json(outcome.error, { status: outcome.status });
   }
 
-  return json(outcome.result, { status: 201 });
+  return json(outcome.result, {
+    status: outcome.result.status === "awaiting_approval" ? 202 : 201
+  });
 }

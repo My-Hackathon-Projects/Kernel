@@ -82,6 +82,40 @@ export default async function RunPage({ params }: RunPageProps) {
           </section>
         ))}
 
+        {run.approvals.length > 0 ? (
+          <section className="panel validation-panel">
+            <div className="section-heading">
+              <h2>Approvals</h2>
+              <span>{run.approvals.length}</span>
+            </div>
+            {run.approvals.map((approval) => (
+              <article className="approval-card" key={approval.id}>
+                <div>
+                  <h3>{approval.status}</h3>
+                  <p>{approval.prompt}</p>
+                </div>
+                <dl className="approval-meta">
+                  <div>
+                    <dt>Step</dt>
+                    <dd>{approval.stepId}</dd>
+                  </div>
+                  <div>
+                    <dt>Decided by</dt>
+                    <dd>{approval.decidedBy ?? "Not decided"}</dd>
+                  </div>
+                  <div>
+                    <dt>Decided</dt>
+                    <dd>{formatDate(approval.decidedAt)}</dd>
+                  </div>
+                </dl>
+                <pre className="result">
+                  {JSON.stringify(approval.payload, null, 2)}
+                </pre>
+              </article>
+            ))}
+          </section>
+        ) : null}
+
         <section className="panel">
           <div className="section-heading">
             <h2>Steps</h2>

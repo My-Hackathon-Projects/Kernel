@@ -3,12 +3,16 @@ import { type Page } from "playwright";
 import { resolveTarget, type ResolvedTarget } from "./target-resolver";
 
 type WorkflowStep = WorkflowDefinition["steps"][number];
+type TargetStep = Extract<WorkflowStep, { target: unknown }>;
+type FieldStep = Extract<WorkflowStep, { field: string }>;
 
 export type StepExecutionResult = {
   selector?: string;
   resolvedValue?: string;
-  resolvedTier?: number;
+  resolvedTier?: ResolvedTarget["tier"];
 };
+
+export type ResolvedStepTarget = ResolvedTarget;
 
 function buildStepUrl(baseUrl: string, path: string): string {
   return new URL(path, `${baseUrl}/`).toString();
@@ -23,12 +27,19 @@ function getStepInput(input: WorkflowInput, field: string): string {
   return value;
 }
 
-async function resolve(page: Page, step: Extract<WorkflowStep, { target: unknown }>) {
+export async function resolveWorkflowStepTarget(
+  page: Page,
+  step: TargetStep
+): Promise<ResolvedStepTarget> {
   return resolveTarget(page, step.target);
 }
 
-async function waitForResolvedTarget(target: ResolvedTarget): Promise<void> {
+export async function waitForResolvedTarget(target: ResolvedTarget): Promise<void> {
   await target.locator.waitFor({ state: "visible" });
+}
+
+export function readStepInput(input: WorkflowInput, step: FieldStep): string {
+  return getStepInput(input, step.field);
 }
 
 export async function executeWorkflowStep(
@@ -47,7 +58,7 @@ export async function executeWorkflowStep(
       return {};
     }
     case "click": {
-      const target = await resolve(page, params.step);
+      const target = await resolveWorkflowStepTarget(page, params.step);
       await waitForResolvedTarget(target);
       await target.locator.click();
       return {
@@ -56,7 +67,7 @@ export async function executeWorkflowStep(
       };
     }
     case "fill": {
-      const target = await resolve(page, params.step);
+      const target = await resolveWorkflowStepTarget(page, params.step);
       const value = getStepInput(params.input, params.step.field);
       await waitForResolvedTarget(target);
       await target.locator.fill(value);
@@ -67,7 +78,7 @@ export async function executeWorkflowStep(
       };
     }
     case "select": {
-      const target = await resolve(page, params.step);
+      const target = await resolveWorkflowStepTarget(page, params.step);
       const value = getStepInput(params.input, params.step.field);
       await waitForResolvedTarget(target);
       await target.locator.selectOption(value);
@@ -78,7 +89,7 @@ export async function executeWorkflowStep(
       };
     }
     case "waitFor": {
-      const target = await resolve(page, params.step);
+      const target = await resolveWorkflowStepTarget(page, params.step);
       await waitForResolvedTarget(target);
       return {
         selector: target.selector,

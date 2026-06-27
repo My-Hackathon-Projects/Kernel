@@ -28,6 +28,10 @@ type InvokeResult = {
     passed: boolean;
     reason?: string;
   } | null;
+  approval?: {
+    id: string;
+    status: string;
+  } | null;
 };
 
 type ApiError = {
@@ -200,7 +204,15 @@ export function ToolInvoker() {
       {result ? (
         <div className="invoke-result" role="status">
           <h3>{result.status}</h3>
-          <p>Validation: {result.validation?.passed ? "passed" : "failed"}</p>
+          <p>
+            Validation:{" "}
+            {result.validation
+              ? result.validation.passed
+                ? "passed"
+                : "failed"
+              : "not run"}
+          </p>
+          {result.approval ? <p>Approval: {result.approval.status}</p> : null}
           <a href={`/runs/${result.run_id}`}>Open evidence</a>
         </div>
       ) : null}

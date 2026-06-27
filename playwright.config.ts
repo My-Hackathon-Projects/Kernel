@@ -10,6 +10,7 @@ const e2eEnv = {
   DATABASE_URL: "file:../.tmp/agentport-e2e.sqlite",
   MOCK_PORTAL_BASE_URL: mockPortalUrl,
   MOCK_PORTAL_PORT: "3001",
+  PLAYWRIGHT_BROWSERS_PATH: path.join(process.cwd(), ".cache", "ms-playwright"),
   RUNNER_BASE_URL: runnerUrl,
   RUNNER_HOST: "127.0.0.1",
   RUNNER_PORT: "4000"

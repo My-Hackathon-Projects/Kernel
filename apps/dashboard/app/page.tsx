@@ -1,3 +1,4 @@
+import { ApprovalInbox } from "../components/approval-inbox";
 import { ToolInvoker } from "../components/tool-invoker";
 import { WorkflowValidator } from "../components/workflow-validator";
 
@@ -14,6 +15,9 @@ export default function DashboardPage() {
         </section>
         <section className="panel">
           <ToolInvoker />
+        </section>
+        <section className="panel">
+          <ApprovalInbox />
         </section>
         <section className="panel">
           <WorkflowValidator />

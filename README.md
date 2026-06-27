@@ -3,10 +3,11 @@
 AgentPort records a human web workflow once and turns it into a typed, audited
 MCP tool that agents can call safely.
 
-The repository is implemented through M3. It includes the mock procurement
+The repository is implemented through M5. It includes the mock procurement
 portal, shared workflow contracts, a deterministic Playwright runner, persisted
-run evidence, the dashboard Test Invoke path, and an MCP Streamable HTTP endpoint
-for the compiled `create_vendor` tool.
+run evidence, human approval pause and resume, independent post-run validation,
+the dashboard Test Invoke path, and an MCP Streamable HTTP endpoint for the
+compiled `create_vendor` tool.
 
 ## Repository Layout
 
@@ -14,11 +15,11 @@ for the compiled `create_vendor` tool.
 apps/
   dashboard/                Next.js control plane
     app/                    pages, API handlers, MCP endpoint, run evidence pages
-    components/             workflow validator and Test Invoke UI
-    lib/                    dashboard config, tool invocation, validation, MCP setup
+    components/             workflow validator, Test Invoke UI, approval inbox
+    lib/                    dashboard config, tool invocation, approval, MCP setup
   runner/                   Fastify execution service
-    src/routes/             health and execute route plugins
-    src/execution/          Playwright browser, target resolver, artifacts, executor
+    src/routes/             health, execute, and resume route plugins
+    src/execution/          Playwright browser, resolver, artifacts, approvals, validation
   mock-portal/              Next.js demo target app
     app/                    vendor pages and validation API
     components/vendors/     vendor form and created summary
@@ -78,28 +79,40 @@ Default local ports:
 - `GET /api/tools` lists enabled compiled tools.
 - `GET /api/tools/:toolId` returns one compiled tool.
 - `POST /api/tools/:toolId/runs` validates input, creates a run, calls the
-  runner, validates the end state, and returns:
+  runner, and returns `202` while a write action is awaiting approval:
 
 ```json
 {
   "run_id": "cmq...",
-  "status": "succeeded",
-  "validation": { "passed": true },
+  "status": "awaiting_approval",
+  "approval": { "id": "cmq...", "status": "pending" },
+  "validation": null,
   "evidence_url": "http://localhost:3000/runs/cmq..."
 }
 ```
 
-- `GET /api/runs/:runId` returns run details, ordered steps, validations, and
-  artifacts.
+- `GET /api/approvals` lists pending approval requests with frozen inputs and
+  the resolved element.
+- `POST /api/approvals/:approvalId/decision` accepts
+  `{ "decision": "approve" | "reject" }` and resumes or rejects the paused run.
+- `GET /api/runs/:runId` returns run details, ordered steps, approvals,
+  validations, and artifacts.
+- `GET /api/runs/:runId/stream` emits persisted trace events as server-sent
+  events.
 - `GET /api/runs/:runId/artifacts/:artifactId` returns stored screenshots.
 - `/mcp` exposes the MCP Streamable HTTP endpoint.
 
 ### Runner
 
 `POST /execute` accepts `{ runId, workflow, input }`, validates the payload
-against `packages/core`, drives the mock portal in Playwright, persists each
-`RunStep`, captures a screenshot artifact for each step, and returns the typed
-execution result.
+against `packages/core`, drives the mock portal in Playwright, pauses before
+write-risk steps, persists each `RunStep`, captures screenshot artifacts, emits
+trace events, and returns the typed execution result.
+
+`POST /resume` accepts `{ runId, approvalId, decision }`. Approval clicks the
+paused write target, continues execution, validates the created record through
+the mock portal API, and returns `succeeded` or `validation_failed`. Rejection
+ends the run with no write action.
 
 ### Mock Portal
 
@@ -134,10 +147,12 @@ Implemented:
   artifacts, runner API validation.
 - M3: workflow compiler, persisted tool seed, dashboard Test Invoke path, MCP
   Streamable HTTP endpoint, external MCP client script.
+- M4: approval gate, pending approval inbox, runner resume route, rejection path,
+  and persisted trace event stream.
+- M5: independent `record_exists_api` validation, persisted validation evidence,
+  and distinct `validation_failed` run status.
 
 Not implemented yet:
 
-- Human approval pause and resume.
-- Live trace streaming.
 - Selector patch review and semantic fallback.
 - Recorder UI.

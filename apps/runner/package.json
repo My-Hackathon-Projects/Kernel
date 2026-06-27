@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc --noEmit",
-    "dev": "PLAYWRIGHT_BROWSERS_PATH=../../.cache/ms-playwright tsx watch src/index.ts",
-    "start": "PLAYWRIGHT_BROWSERS_PATH=../../.cache/ms-playwright tsx src/index.ts",
+    "dev": "PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-../../.cache/ms-playwright} tsx watch src/index.ts",
+    "start": "PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-../../.cache/ms-playwright} tsx src/index.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

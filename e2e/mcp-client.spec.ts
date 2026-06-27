@@ -46,10 +46,12 @@ test("external MCP client discovers and calls create_vendor", async () => {
   const result = parseJsonFromStdout(stdout) as {
     run_id: string;
     status: string;
+    approval: { id: string; status: string } | null;
     validation: { passed: boolean } | null;
   };
 
-  expect(result.status).toBe("succeeded");
-  expect(result.validation?.passed).toBe(true);
+  expect(result.status).toBe("awaiting_approval");
+  expect(result.approval?.status).toBe("pending");
+  expect(result.validation).toBeNull();
   expect(result.run_id.length).toBeGreaterThan(0);
 });

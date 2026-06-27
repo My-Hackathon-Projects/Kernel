@@ -7,7 +7,7 @@
 
 ## Current implementation status
 
-The codebase is implemented through M3:
+The codebase is implemented through M5:
 
 - M0 and M1 provide the monorepo, shared contracts, mock procurement portal,
   validated vendor API, and selector-resilience variant.
@@ -16,9 +16,13 @@ The codebase is implemented through M3:
 - M3 provides the workflow compiler, seeded `create_vendor` tool, dashboard
   Test Invoke path, MCP Streamable HTTP endpoint, and external MCP client smoke
   script.
+- M4 provides the approval pause/resume path, dashboard approval inbox, reject
+  path, and persisted TraceEvents exposed over `/api/runs/:id/stream`.
+- M5 provides independent `record_exists_api` validation in the runner,
+  persisted validation evidence, and a distinct `validation_failed` status.
 
-Approval pause/resume, live trace streaming, selector patch review, semantic
-fallback, and recorder UI remain future milestones.
+Selector patch review, semantic fallback, and recorder UI remain future
+milestones.
 
 ---
 

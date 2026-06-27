@@ -43,3 +43,18 @@ export {
   type ToolInvokeResult,
   type ValidationResult
 } from "./run";
+
+export {
+  approvalDecisionSchema,
+  resumeRequestSchema,
+  type ApprovalDecision,
+  type ResumeRequest
+} from "./approval";
+
+export { traceEventSchema, type TraceEvent } from "./trace";
+
+export {
+  validateRecordExistsApi,
+  type ValidationFetch,
+  type ValidationFetchResponse
+} from "./validators/record-exists";

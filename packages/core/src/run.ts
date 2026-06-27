@@ -1,7 +1,15 @@
 import { z } from "zod";
 import { nonEmptyString } from "./primitives";
 
-export const runStatusSchema = z.enum(["pending", "running", "succeeded", "failed"]);
+export const runStatusSchema = z.enum([
+  "pending",
+  "running",
+  "awaiting_approval",
+  "succeeded",
+  "validation_failed",
+  "rejected",
+  "failed"
+]);
 export const validationResultSchema = z.object({
   passed: z.boolean(),
   expected: z.record(nonEmptyString, z.unknown()),
@@ -13,6 +21,13 @@ export const toolInvokeResultSchema = z.object({
   run_id: nonEmptyString,
   status: runStatusSchema,
   validation: validationResultSchema.nullable(),
+  approval: z
+    .object({
+      id: nonEmptyString,
+      status: nonEmptyString
+    })
+    .nullable()
+    .optional(),
   evidence_url: nonEmptyString
 });
 
@@ -37,6 +52,13 @@ export const runnerExecuteResultSchema = z.object({
       uri: nonEmptyString
     })
   ),
+  approval: z
+    .object({
+      id: nonEmptyString,
+      status: nonEmptyString
+    })
+    .nullable(),
+  validation: validationResultSchema.nullable(),
   evidenceUrl: nonEmptyString
 });
 

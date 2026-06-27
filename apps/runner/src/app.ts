@@ -1,11 +1,16 @@
 import Fastify from "fastify";
 import { closeRunnerBrowser } from "./execution/browser-manager";
-import { type ExecuteWorkflow } from "./execution/workflow-executor";
+import {
+  type ExecuteWorkflow,
+  type ResumeWorkflow
+} from "./execution/workflow-executor";
 import { executeRoutes } from "./routes/execute";
 import { healthRoutes } from "./routes/health";
+import { resumeRoutes } from "./routes/resume";
 
 type RunnerOptions = {
   executeWorkflow?: ExecuteWorkflow;
+  resumeWorkflow?: ResumeWorkflow;
   logger?: boolean;
 };
 
@@ -18,9 +23,13 @@ export function buildRunner(options: RunnerOptions = {}) {
   const executeRouteOptions = options.executeWorkflow
     ? { executeWorkflow: options.executeWorkflow }
     : {};
+  const resumeRouteOptions = options.resumeWorkflow
+    ? { resumeWorkflow: options.resumeWorkflow }
+    : {};
 
   app.register(healthRoutes);
   app.register(executeRoutes, executeRouteOptions);
+  app.register(resumeRoutes, resumeRouteOptions);
   app.addHook("onClose", async () => {
     await closeRunnerBrowser();
   });
