@@ -1,5 +1,6 @@
 import { pathToFileURL } from "node:url";
 import { buildRunner } from "./app.js";
+import { loadRunnerEnv } from "./env-loader.js";
 
 export type RunnerConfig = {
   host: string;
@@ -21,6 +22,7 @@ export function resolveRunnerConfig(env: NodeJS.ProcessEnv): RunnerConfig {
 }
 
 export async function startRunner() {
+  loadRunnerEnv();
   const app = buildRunner();
   const { host, port } = resolveRunnerConfig(process.env);
 

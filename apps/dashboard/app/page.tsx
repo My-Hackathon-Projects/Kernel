@@ -1,6 +1,6 @@
 import { ApprovalInbox } from "../components/approval-inbox";
 import { ToolInvoker } from "../components/tool-invoker";
-import { WorkflowValidator } from "../components/workflow-validator";
+import { WorkflowStudio } from "../components/workflow-studio";
 
 export default function DashboardPage() {
   return (
@@ -12,6 +12,12 @@ export default function DashboardPage() {
             AgentPort compiles a recorded browser workflow into a typed tool, executes
             it through the runner, validates the result, and stores replayable evidence.
           </p>
+          <nav className="dashboard-nav" aria-label="Dashboard navigation">
+            <a href="/studio">Workflow studio</a>
+            <a href="/tools">Tools</a>
+            <a href="/runs">Runs</a>
+            <a href="/patches">Selector patches</a>
+          </nav>
         </section>
         <section className="panel">
           <ToolInvoker />
@@ -20,7 +26,7 @@ export default function DashboardPage() {
           <ApprovalInbox />
         </section>
         <section className="panel">
-          <WorkflowValidator />
+          <WorkflowStudio />
         </section>
       </div>
     </main>

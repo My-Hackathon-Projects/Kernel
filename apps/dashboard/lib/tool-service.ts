@@ -13,7 +13,6 @@ import {
   createRunForTool,
   ensureCreateVendorTool,
   getPrismaClient,
-  getRunDetail,
   getToolWithWorkflow,
   listEnabledTools,
   parseStoredWorkflow
@@ -42,7 +41,7 @@ export type ToolInvocationOutcome =
   | { success: true; result: ToolInvokeResult }
   | { success: false; status: number; error: ApiErrorBody };
 
-function toDashboardTool(
+export function toDashboardTool(
   tool: Awaited<ReturnType<typeof ensureCreateVendorTool>>
 ): DashboardTool {
   return {
@@ -97,10 +96,6 @@ export async function getDefaultTool(): Promise<DashboardTool> {
   }
 
   return tool;
-}
-
-export async function getRun(runId: string) {
-  return getRunDetail(getPrismaClient(), runId);
 }
 
 async function callRunner(params: {

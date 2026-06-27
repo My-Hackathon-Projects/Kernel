@@ -20,6 +20,7 @@ import { createRunPage } from "./browser-manager";
 import { isWriteClickStep, nowMs, type ExecutionState } from "./execution-state";
 import { takePendingApprovalRun, type PendingApprovalRun } from "./pending-runs";
 import { completeValidation, failRun } from "./run-finalizer";
+import { recordSelectorPatch } from "./selector-patch-recorder";
 import { completeExecutedStep } from "./step-recorder";
 import { executeWorkflowStep } from "./step-executor";
 import { emitStepResolved, emitTrace } from "./trace-recorder";
@@ -83,6 +84,11 @@ async function executeStepsUntilPause(
           selector: stepResult.selector
         });
       }
+      await recordSelectorPatch({
+        state,
+        stepId: step.id,
+        patch: stepResult.patch
+      });
 
       await completeExecutedStep({
         state,
@@ -123,6 +129,7 @@ export function createWorkflowExecutor(
     const { context, page } = await createRunPage();
     const state: ExecutionState = {
       runId: run.id,
+      workflowId: run.tool.workflowId,
       request,
       config,
       context,

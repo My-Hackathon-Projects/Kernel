@@ -4,6 +4,7 @@ import {
   createWorkflowResumer,
   type ResumeWorkflow
 } from "../execution/workflow-executor";
+import { sendExecutionResult } from "./route-helpers";
 
 type ResumeRouteOptions = {
   resumeWorkflow?: ResumeWorkflow;
@@ -24,15 +25,17 @@ export async function resumeRoutes(
         .send(apiError("validation_failed", "Request validation failed"));
     }
 
-    try {
-      return reply.status(200).send(await resumeWorkflow(parsed.data));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Workflow resume failed";
-      request.log.error(
-        { err: error, runId: parsed.data.runId, approvalId: parsed.data.approvalId },
-        "Workflow resume failed"
-      );
-      return reply.status(500).send(apiError("resume_failed", message));
-    }
+    return sendExecutionResult(
+      reply,
+      {
+        errorCode: "resume_failed",
+        message: "Workflow resume failed",
+        logContext: {
+          runId: parsed.data.runId,
+          approvalId: parsed.data.approvalId
+        }
+      },
+      () => resumeWorkflow(parsed.data)
+    );
   });
 }

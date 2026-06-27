@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { z } from "zod";
 import { apiError, type ApiErrorBody } from "../api-error";
 import { type WorkflowDefinition } from "../workflow";
 
@@ -11,6 +12,24 @@ export type ToolInputJsonSchema = {
   properties: Record<string, JsonSchemaProperty>;
   required: string[];
 };
+
+/**
+ * Runtime guard for a compiled tool input schema. Tool input schemas are stored
+ * as JSON in the database, so consumers that read them back (the MCP server,
+ * the tools registry) parse with this instead of casting untyped JSON.
+ */
+export const toolInputJsonSchemaSchema = z.object({
+  type: z.literal("object"),
+  additionalProperties: z.literal(false),
+  properties: z.record(
+    z.string(),
+    z.object({
+      type: z.literal("string"),
+      enum: z.array(z.string()).min(1).optional()
+    })
+  ),
+  required: z.array(z.string())
+});
 
 export type CompiledToolDefinition = {
   name: string;
@@ -49,6 +68,11 @@ function contentHashForWorkflow(workflow: WorkflowDefinition): string {
   return createHash("sha256").update(stableJsonStringify(workflow)).digest("hex");
 }
 
+// The workflow schema's `superRefine` already rejects steps whose `field` is not
+// a declared input, so a parsed WorkflowDefinition is normally consistent. This
+// check is kept deliberately: it lets `compileTool` return a typed
+// `compile_failed` error (part of its contract) even when callers pass a
+// definition that bypassed schema parsing.
 function validateStepFields(workflow: WorkflowDefinition): ApiErrorBody | null {
   const details = workflow.steps.flatMap((step, index) => {
     if (!("field" in step) || Object.hasOwn(workflow.inputs, step.field)) {

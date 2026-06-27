@@ -1,15 +1,20 @@
-import { type WorkflowDefinition, type WorkflowInput } from "@agentport/core";
+import {
+  type SelectorPatchProposal,
+  type WorkflowDefinition,
+  type WorkflowInput
+} from "@agentport/core";
 import { type Page } from "playwright";
 import { resolveTarget, type ResolvedTarget } from "./target-resolver";
 
 type WorkflowStep = WorkflowDefinition["steps"][number];
 type TargetStep = Extract<WorkflowStep, { target: unknown }>;
-type FieldStep = Extract<WorkflowStep, { field: string }>;
 
 export type StepExecutionResult = {
   selector?: string;
   resolvedValue?: string;
   resolvedTier?: ResolvedTarget["tier"];
+  confidence?: number;
+  patch?: SelectorPatchProposal | null;
 };
 
 export type ResolvedStepTarget = ResolvedTarget;
@@ -38,10 +43,6 @@ export async function waitForResolvedTarget(target: ResolvedTarget): Promise<voi
   await target.locator.waitFor({ state: "visible" });
 }
 
-export function readStepInput(input: WorkflowInput, step: FieldStep): string {
-  return getStepInput(input, step.field);
-}
-
 export async function executeWorkflowStep(
   page: Page,
   params: {
@@ -63,7 +64,9 @@ export async function executeWorkflowStep(
       await target.locator.click();
       return {
         selector: target.selector,
-        resolvedTier: target.tier
+        resolvedTier: target.tier,
+        confidence: target.confidence,
+        patch: target.patch
       };
     }
     case "fill": {
@@ -74,7 +77,9 @@ export async function executeWorkflowStep(
       return {
         selector: target.selector,
         resolvedValue: value,
-        resolvedTier: target.tier
+        resolvedTier: target.tier,
+        confidence: target.confidence,
+        patch: target.patch
       };
     }
     case "select": {
@@ -85,7 +90,9 @@ export async function executeWorkflowStep(
       return {
         selector: target.selector,
         resolvedValue: value,
-        resolvedTier: target.tier
+        resolvedTier: target.tier,
+        confidence: target.confidence,
+        patch: target.patch
       };
     }
     case "waitFor": {
@@ -93,7 +100,9 @@ export async function executeWorkflowStep(
       await waitForResolvedTarget(target);
       return {
         selector: target.selector,
-        resolvedTier: target.tier
+        resolvedTier: target.tier,
+        confidence: target.confidence,
+        patch: target.patch
       };
     }
   }

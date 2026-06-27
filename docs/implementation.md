@@ -7,7 +7,7 @@
 
 ## Current implementation status
 
-The codebase is implemented through M5:
+The codebase is implemented through M8:
 
 - M0 and M1 provide the monorepo, shared contracts, mock procurement portal,
   validated vendor API, and selector-resilience variant.
@@ -20,9 +20,19 @@ The codebase is implemented through M5:
   path, and persisted TraceEvents exposed over `/api/runs/:id/stream`.
 - M5 provides independent `record_exists_api` validation in the runner,
   persisted validation evidence, and a distinct `validation_failed` status.
+- M6 provides the trace viewer, run list, step timeline, live SSE replay,
+  approval and validation detail, screenshot links, selector patch evidence, and
+  failure-state views.
+- M7 provides semantic selector patch capture, tiered selector resolution,
+  Anthropic-backed tier-3 fallback, patch review, and workflow selector-cache
+  updates when a patch is accepted.
+- M8 provides the workflow studio: `POST /api/workflows` compiles a pasted or
+  hand-authored workflow JSON into a registered tool, the `/studio` page drives
+  it, and the `/tools` registry lists every compiled tool with its MCP snippet.
+  A compiled tool is exposed over MCP immediately.
 
-Selector patch review, semantic fallback, and recorder UI remain future
-milestones.
+The M8 studio is the codegen-to-JSON recorder path. A browser-extension recorder
+remains a future milestone.
 
 ---
 

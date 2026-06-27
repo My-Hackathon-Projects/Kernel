@@ -1,39 +1,112 @@
 # AgentPort
 
 AgentPort records a human web workflow once and turns it into a typed, audited
-MCP tool that agents can call safely.
+MCP tool that agents can call safely. An agent supplies intent and structured
+input. AgentPort executes the workflow deterministically in a real browser,
+pauses for human approval before write actions, validates the result through an
+independent channel, and stores replayable evidence.
 
-The repository is implemented through M5. It includes the mock procurement
-portal, shared workflow contracts, a deterministic Playwright runner, persisted
-run evidence, human approval pause and resume, independent post-run validation,
-the dashboard Test Invoke path, and an MCP Streamable HTTP endpoint for the
-compiled `create_vendor` tool.
+The core principle is the split of responsibilities. The model is allowed in
+exactly two places: mapping user intent to typed inputs before the call, and
+tier-3 selector resolution that returns a strict JSON binding the runtime tests
+before it acts. Everywhere else is plain, deterministic Playwright. The model
+handles intent; the runtime handles action.
 
-## Repository Layout
+## User flow
+
+```mermaid
+flowchart TD
+    Start([Start]) --> Rec["Operator records workflow once"]
+    Rec --> Map["Review steps, map input fields, tag risk"]
+    Map --> Comp["Compile to typed MCP tool"]
+    Comp --> Conn["Agent connects to AgentPort over MCP"]
+    Conn --> Call["Agent calls tool with typed input"]
+    Call --> Val0{"Input valid?"}
+    Val0 -- no --> Rej0["Reject at MCP boundary, no browser starts"]
+    Val0 -- yes --> Exec["Runner executes next step"]
+    Exec --> Sel{"Selector resolves?"}
+    Sel -->|"no, read or nav step"| Heal["Self-heal: propose and test selector"]
+    Heal --> Exec
+    Sel -->|"no, write step"| FailW["Fail run, require patch review"]
+    Sel -- yes --> Risk{"Write step?"}
+    Risk -- yes --> Appr["Pause for human approval"]
+    Appr --> Dec{"Approved?"}
+    Dec -- no --> RejW["End run, recorded as rejected"]
+    Dec -- yes --> Do["Execute step"]
+    Risk -- no --> Do
+    Do --> More{"More steps?"}
+    More -- yes --> Exec
+    More -- no --> Validate["Validate end state"]
+    Validate --> Evidence["Store evidence, return result and evidence URL"]
+    Evidence --> End([End])
+```
+
+The tool call with the approval gate, end to end:
+
+```mermaid
+sequenceDiagram
+    participant Agent
+    participant MCP as MCP Endpoint
+    participant Orch as Run Orchestration
+    participant DB
+    participant Runner
+    participant Target
+    participant Human
+
+    Agent->>MCP: tools/call create_vendor(input)
+    MCP->>MCP: validate input (zod)
+    MCP->>Orch: create run
+    Orch->>DB: insert Run(status=pending)
+    Orch->>Runner: POST /execute {runId, workflow, input}
+    Runner->>Target: replay read and nav steps (Playwright)
+    Runner->>DB: insert RunStep + screenshot per step
+    Note over Runner: reaches a write step
+    Runner->>DB: insert ApprovalRequest(status=pending)
+    Runner-->>Orch: event awaiting_approval
+    Orch->>DB: update Run(status=awaiting_approval)
+    Orch-->>Agent: blocking, awaiting approval
+    Human->>Orch: POST /approvals/:id/decision approve
+    Orch->>Runner: POST /resume {runId, approvalId, approve}
+    Runner->>Target: execute write step
+    Runner->>Target: run validation probe
+    Runner->>DB: insert Validation(passed=true)
+    Runner-->>Orch: run succeeded
+    Orch->>DB: update Run(status=succeeded)
+    Orch-->>Agent: result {run_id, status, evidence_url}
+```
+
+## Architecture
+
+Three deployable apps and two shared packages, TypeScript throughout.
 
 ```text
 apps/
-  dashboard/                Next.js control plane
-    app/                    pages, API handlers, MCP endpoint, run evidence pages
-    components/             workflow validator, Test Invoke UI, approval inbox
-    lib/                    dashboard config, tool invocation, approval, MCP setup
-  runner/                   Fastify execution service
+  dashboard/                Next.js control plane: UI, control-plane REST, and the MCP endpoint
+    app/                    pages, API handlers, MCP endpoint, run/patch/studio/tools pages
+    components/             tool invoker, workflow studio, approval inbox, run trace UI
+    lib/                    config, tool/run/approval/patch/workflow services, MCP server
+  runner/                   Fastify execution service that owns Playwright
     src/routes/             health, execute, and resume route plugins
-    src/execution/          Playwright browser, resolver, artifacts, approvals, validation
-  mock-portal/              Next.js demo target app
-    app/                    vendor pages and validation API
+    src/execution/          browser, tiered resolver, patches, artifacts, approvals, validation
+  mock-portal/              Next.js demo target and its independent validation API
+    app/                    vendor pages and the vendor API
     components/vendors/     vendor form and created summary
     hooks/                  client form state and submission
     lib/                    in-memory vendor store and form config
 packages/
-  core/                     shared zod contracts, workflow parser, compiler, fixtures
-  db/                       Prisma client, demo seed helpers, run/tool repositories
+  core/                     shared zod contracts, workflow parser, tool compiler, validators, fixtures
+  db/                       Prisma client, demo seed helpers, run/tool/patch repositories
 prisma/
   schema.prisma             local SQLite control-plane data model
 scripts/
   prepare-e2e.ts            isolated E2E database and artifact setup
   mcp-create-vendor.ts      external MCP smoke client
 ```
+
+The dashboard owns the control plane and the single MCP endpoint agents connect
+to. The runner is a separate service because Playwright needs a long-lived warm
+browser, which does not fit a serverless dashboard. `core` holds pure,
+unit-tested logic with no I/O.
 
 ## Setup
 
@@ -50,6 +123,11 @@ pnpm playwright:install
 The local database defaults to SQLite through `DATABASE_URL="file:./dev.db"`.
 Run screenshots are stored under `ARTIFACT_ROOT`, which defaults to
 `.tmp/artifacts` in the E2E harness.
+
+Set `ANTHROPIC_API_KEY` in `.env` for the tier-3 semantic selector fallback. The
+runner reads only Anthropic settings from `.env` and never returns them in API
+responses or logs. `ANTHROPIC_MODEL` is optional and defaults to
+`claude-sonnet-4-5`.
 
 ## Commands
 
@@ -71,15 +149,37 @@ Default local ports:
 - Runner: <http://127.0.0.1:4000>
 - Mock portal: <http://localhost:3001>
 
-## Current API Surface
+## Workflow studio
+
+The studio is the recorder path for this build. Instead of a browser extension,
+you bring a workflow JSON (start from Playwright `codegen` output and hand-edit
+it into the AgentPort shape), and the dashboard compiles it into a registered
+tool.
+
+1. Open <http://localhost:3000/studio>.
+2. The editor is seeded with the `create_vendor` workflow. Edit it or paste your
+   own.
+3. Validate the contract, then compile and register the tool.
+4. The compiled tool appears in the registry at <http://localhost:3000/tools>
+   and is exposed over MCP immediately, with no restart.
+
+A workflow declares its typed inputs, its steps as semantic targets (role,
+intent, and accessible-name hints rather than brittle selectors), and a
+validation probe. The compiler maps inputs to a JSON Schema, asserts every step
+field is a declared input, and content-hashes the version.
+
+## API surface
 
 ### Dashboard
 
 - `POST /api/workflows/validate` validates workflow JSON and returns metadata.
+- `POST /api/workflows` validates and compiles a workflow, persists it, and
+  returns the registered tool. This is the studio backend.
 - `GET /api/tools` lists enabled compiled tools.
 - `GET /api/tools/:toolId` returns one compiled tool.
+- `GET /api/runs` lists recent runs for the trace viewer.
 - `POST /api/tools/:toolId/runs` validates input, creates a run, calls the
-  runner, and returns `202` while a write action is awaiting approval:
+  runner, and returns `202` while a write action awaits approval:
 
 ```json
 {
@@ -91,30 +191,39 @@ Default local ports:
 }
 ```
 
-- `GET /api/approvals` lists pending approval requests with frozen inputs and
-  the resolved element.
+- `GET /api/approvals` lists pending approvals with frozen inputs and the
+  resolved element.
 - `POST /api/approvals/:approvalId/decision` accepts
   `{ "decision": "approve" | "reject" }` and resumes or rejects the paused run.
 - `GET /api/runs/:runId` returns run details, ordered steps, approvals,
-  validations, and artifacts.
+  validations, artifacts, trace events, audit records, and selector patches.
 - `GET /api/runs/:runId/stream` emits persisted trace events as server-sent
   events.
 - `GET /api/runs/:runId/artifacts/:artifactId` returns stored screenshots.
+- `GET /api/patches` lists selector patches waiting for review.
+- `POST /api/patches/:patchId/accept` accepts a selector patch into the workflow
+  selector cache and recompiles the persisted tool definition.
 - `/mcp` exposes the MCP Streamable HTTP endpoint.
+
+Dashboard pages: `/` (invoke, approvals, studio), `/studio`, `/tools`, `/runs`,
+`/runs/:runId`, `/patches`.
 
 ### Runner
 
 `POST /execute` accepts `{ runId, workflow, input }`, validates the payload
 against `packages/core`, drives the mock portal in Playwright, pauses before
 write-risk steps, persists each `RunStep`, captures screenshot artifacts, emits
-trace events, and returns the typed execution result.
+trace events, records selector patches, and returns the typed execution result.
+Target resolution uses tier 1 cached selectors, tier 2 role and accessible-name
+rebinding, then tier 3 Anthropic-assisted semantic fallback with strict zod JSON
+validation and tested selectors.
 
 `POST /resume` accepts `{ runId, approvalId, decision }`. Approval clicks the
 paused write target, continues execution, validates the created record through
 the mock portal API, and returns `succeeded` or `validation_failed`. Rejection
 ends the run with no write action.
 
-### Mock Portal
+### Mock portal
 
 - `/vendors` lists created vendors.
 - `/vendors/new` creates a vendor through `POST /api/vendors`.
@@ -124,7 +233,7 @@ ends the run with no write action.
 The vendor page includes inert injection bait. Submitted values come from the
 validated workflow input, not page text.
 
-## MCP Smoke Client
+## MCP smoke client
 
 With the three services running, call the compiled tool from a separate process:
 
@@ -135,7 +244,7 @@ AGENTPORT_MCP_URL=http://localhost:3000/mcp pnpm mcp:create-vendor
 The script discovers `create_vendor`, calls it with typed arguments, and prints
 the MCP tool result as JSON.
 
-## Milestone Status
+## Milestone status
 
 Implemented:
 
@@ -151,8 +260,13 @@ Implemented:
   and persisted trace event stream.
 - M5: independent `record_exists_api` validation, persisted validation evidence,
   and distinct `validation_failed` run status.
+- M6: run list and trace replay UI, live SSE trace subscription, step timeline,
+  approval and validation evidence, screenshot links, and failure-state detail.
+- M7: semantic selector patch capture, tiered resolver cache and rebind logic,
+  Anthropic-backed tier-3 fallback, patch review UI, and workflow cache updates
+  when a patch is accepted.
+- M8: workflow studio that compiles a pasted or hand-authored workflow JSON into
+  a registered, MCP-exposed tool, plus a tools registry view.
 
-Not implemented yet:
-
-- Selector patch review and semantic fallback.
-- Recorder UI.
+The M8 studio is the codegen-to-JSON recorder path described in the design docs.
+A polished browser-extension recorder remains out of scope for this build.

@@ -1,6 +1,6 @@
 import { apiError } from "@agentport/core";
 import { json } from "../../../../lib/http";
-import { getRun } from "../../../../lib/tool-service";
+import { getRun } from "../../../../lib/run-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

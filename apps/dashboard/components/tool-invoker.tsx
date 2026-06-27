@@ -42,11 +42,11 @@ type ApiError = {
   };
 };
 
-const DEFAULT_INPUT: Record<string, string> = {
+const FIELD_PLACEHOLDERS: Record<string, string> = {
   company_name: "Acme GmbH",
   country: "Germany",
   tax_id: "DE123456789",
-  risk_level: "medium"
+  risk_level: "Select risk level"
 };
 
 function labelForField(field: string): string {
@@ -63,7 +63,7 @@ function normalizeToolsResponse(value: unknown): DashboardTool[] {
 
 export function ToolInvoker() {
   const [tool, setTool] = useState<DashboardTool | null>(null);
-  const [input, setInput] = useState<Record<string, string>>(DEFAULT_INPUT);
+  const [input, setInput] = useState<Record<string, string>>({});
   const [result, setResult] = useState<InvokeResult | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(true);
@@ -113,6 +113,10 @@ export function ToolInvoker() {
 
   const fields = useMemo(
     () => Object.entries(tool?.inputSchema.properties ?? {}),
+    [tool]
+  );
+  const requiredFields = useMemo(
+    () => new Set(tool?.inputSchema.required ?? []),
     [tool]
   );
 
@@ -173,11 +177,15 @@ export function ToolInvoker() {
               <span>{labelForField(field)}</span>
               {property.enum ? (
                 <select
+                  required={requiredFields.has(field)}
                   value={input[field] ?? ""}
                   onChange={(event) =>
                     setInput((current) => ({ ...current, [field]: event.target.value }))
                   }
                 >
+                  <option value="" disabled>
+                    {FIELD_PLACEHOLDERS[field] ?? `Select ${labelForField(field)}`}
+                  </option>
                   {property.enum.map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -186,6 +194,8 @@ export function ToolInvoker() {
                 </select>
               ) : (
                 <input
+                  required={requiredFields.has(field)}
+                  placeholder={FIELD_PLACEHOLDERS[field] ?? labelForField(field)}
                   value={input[field] ?? ""}
                   onChange={(event) =>
                     setInput((current) => ({ ...current, [field]: event.target.value }))

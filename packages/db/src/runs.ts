@@ -13,6 +13,24 @@ import { cloneWorkflowInput } from "./tools";
 
 export type RunDetail = Awaited<ReturnType<typeof getRunDetail>>;
 
+export async function listRecentRuns(prisma: PrismaClient, limit = 20) {
+  return prisma.run.findMany({
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: {
+      tool: {
+        include: {
+          workflow: {
+            include: {
+              target: true
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
 export async function ensureRunForExecution(
   prisma: PrismaClient,
   params: {
@@ -40,6 +58,9 @@ export async function ensureRunForExecution(
       input: toJsonValue(cloneWorkflowInput(params.input)),
       status: "pending",
       error: null
+    },
+    include: {
+      tool: true
     }
   });
 }
@@ -368,6 +389,12 @@ export async function getRunDetail(prisma: PrismaClient, runId: string) {
       },
       approvals: {
         orderBy: { createdAt: "asc" }
+      },
+      selectorPatches: {
+        orderBy: { createdAt: "asc" }
+      },
+      auditEvents: {
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }]
       }
     }
   });

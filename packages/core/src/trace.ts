@@ -2,6 +2,7 @@ import { z } from "zod";
 import { nonEmptyString } from "./primitives";
 import { approvalDecisionSchema } from "./approval";
 import { runStatusSchema } from "./run";
+import { resolverTierSchema } from "./selector-patch";
 
 const traceBaseSchema = z.object({
   runId: nonEmptyString
@@ -19,7 +20,7 @@ export const traceEventSchema = z.discriminatedUnion("type", [
   traceBaseSchema.extend({
     type: z.literal("step_resolved"),
     stepId: nonEmptyString,
-    tier: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+    tier: resolverTierSchema,
     selector: nonEmptyString,
     confidence: z.number().min(0).max(1)
   }),
@@ -52,6 +53,15 @@ export const traceEventSchema = z.discriminatedUnion("type", [
     expected: z.record(z.string(), z.unknown()),
     actual: z.record(z.string(), z.unknown()).nullable(),
     reason: z.string().optional()
+  }),
+  traceBaseSchema.extend({
+    type: z.literal("selector_patch"),
+    patchId: nonEmptyString,
+    stepId: nonEmptyString,
+    oldSelector: z.string().nullable(),
+    newSelector: nonEmptyString,
+    tier: resolverTierSchema,
+    confidence: z.number().min(0).max(1)
   }),
   traceBaseSchema.extend({
     type: z.literal("run_finished"),

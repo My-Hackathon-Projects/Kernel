@@ -130,3 +130,95 @@ test("runner records validation failure separately from browser failure", async 
     }
   });
 });
+
+test("runner recovers from the variant submit button and records a selector patch", async ({
+  page,
+  request
+}, testInfo) => {
+  const runId = `run_variant_patch_${testInfo.workerIndex}_${Date.now()}`;
+  const companyName = uniqueCompanyName("Variant Patch Vendor", testInfo);
+  const workflow = createVendorWorkflowFixture();
+  workflow.steps = workflow.steps.filter((step) => step.id !== "s2");
+  workflow.steps[0] = {
+    id: "s1",
+    action: "goto",
+    url: "/vendors/new?variant=v2"
+  };
+
+  const response = await request.post(`${runnerUrl}/execute`, {
+    data: {
+      runId,
+      workflow,
+      input: {
+        company_name: companyName,
+        country: "Germany",
+        tax_id: "DE123456789",
+        risk_level: "high"
+      }
+    }
+  });
+  const result = (await response.json()) as {
+    status: string;
+    approval: { id: string } | null;
+  };
+
+  expect(response.status()).toBe(200);
+  expect(result.status).toBe("awaiting_approval");
+  expect(result.approval?.id).toBeTruthy();
+
+  const detailResponse = await request.get(`${dashboardUrl}/api/runs/${runId}`);
+  const detail = (await detailResponse.json()) as {
+    run: {
+      selectorPatches: Array<{
+        stepId: string;
+        oldSelector: string | null;
+        newSelector: string;
+        tier: number;
+        confidence: number;
+      }>;
+    };
+  };
+  expect(detail.run.selectorPatches).toEqual([
+    expect.objectContaining({
+      stepId: "s7",
+      oldSelector: 'role=button[name="Submit"]',
+      newSelector: 'role=button[name="Send for Approval"]',
+      tier: 2,
+      confidence: 0.95
+    })
+  ]);
+
+  const resumeResponse = await request.post(`${runnerUrl}/resume`, {
+    data: {
+      runId,
+      approvalId: result.approval?.id,
+      decision: "approve"
+    }
+  });
+  const resumeResult = (await resumeResponse.json()) as {
+    status: string;
+    validation: { passed: boolean } | null;
+  };
+
+  expect(resumeResponse.status()).toBe(200);
+  expect(resumeResult.status).toBe("succeeded");
+  expect(resumeResult.validation?.passed).toBe(true);
+
+  const vendorResponse = await request.get(
+    `${mockPortalUrl}/api/vendors?company_name=${encodeURIComponent(companyName)}`
+  );
+  await expect(vendorResponse.json()).resolves.toMatchObject({
+    risk_level: "high"
+  });
+
+  await page.goto(`/runs/${runId}`);
+  await expect(page.getByRole("heading", { name: "Selector Patches" })).toBeVisible();
+  await expect(
+    page.getByText('role=button[name="Send for Approval"]').first()
+  ).toBeVisible();
+
+  await page.goto("/patches");
+  await expect(
+    page.getByText('role=button[name="Send for Approval"]').first()
+  ).toBeVisible();
+});

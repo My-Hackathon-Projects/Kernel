@@ -1,5 +1,5 @@
 import { createVendorWorkflowFixture } from "@agentport/core";
-import { compileTool } from "@agentport/core/compiler";
+import { compileTool, toolInputJsonSchemaSchema } from "@agentport/core/compiler";
 import { describe, expect, it } from "vitest";
 
 describe("compileTool", () => {
@@ -74,5 +74,29 @@ describe("compileTool", () => {
     if (first.success && second.success) {
       expect(first.data.contentHash).not.toBe(second.data.contentHash);
     }
+  });
+});
+
+describe("toolInputJsonSchemaSchema", () => {
+  it("parses a compiled tool input schema and exposes enum values", () => {
+    const compiled = compileTool(createVendorWorkflowFixture());
+
+    expect(compiled.success).toBe(true);
+    if (compiled.success) {
+      const parsed = toolInputJsonSchemaSchema.safeParse(compiled.data.inputSchema);
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.properties.risk_level?.enum).toEqual([
+          "low",
+          "medium",
+          "high"
+        ]);
+        expect(parsed.data.properties.company_name?.enum).toBeUndefined();
+      }
+    }
+  });
+
+  it("rejects a value that is not a compiled tool input schema", () => {
+    expect(toolInputJsonSchemaSchema.safeParse({ type: "string" }).success).toBe(false);
   });
 });

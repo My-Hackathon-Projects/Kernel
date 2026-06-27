@@ -11,6 +11,7 @@ export type WriteClickStep = Extract<WorkflowStep, { action: "click" }>;
 
 export type ExecutionState = {
   runId: string;
+  workflowId: string;
   request: ParsedExecuteRequest;
   config: RunnerExecutionConfig;
   context: BrowserContext;

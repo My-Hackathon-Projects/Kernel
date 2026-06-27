@@ -21,76 +21,87 @@ export async function ensureDemoWorkspace(prisma: PrismaClient) {
   });
 }
 
-export async function ensureDemoTarget(prisma: PrismaClient, baseUrl: string) {
+async function ensureTarget(
+  prisma: PrismaClient,
+  params: { name: string; baseUrl: string; id?: string }
+) {
   await ensureDemoWorkspace(prisma);
 
   return prisma.target.upsert({
     where: {
       workspaceId_name: {
         workspaceId: DEMO_WORKSPACE_ID,
-        name: "mock-procurement"
+        name: params.name
       }
     },
     create: {
-      id: DEMO_TARGET_ID,
+      ...(params.id ? { id: params.id } : {}),
       workspaceId: DEMO_WORKSPACE_ID,
-      name: "mock-procurement",
-      baseUrl,
+      name: params.name,
+      baseUrl: params.baseUrl,
       authMode: "none"
     },
     update: {
-      baseUrl,
+      baseUrl: params.baseUrl,
       authMode: "none"
     }
   });
 }
 
-export async function ensureWorkflow(
-  prisma: PrismaClient,
-  workflow: WorkflowDefinition,
-  targetBaseUrl: string
-) {
-  const target = await ensureDemoTarget(prisma, targetBaseUrl);
-  const compiled = compileToolOrThrow(workflow);
+type StableIds = {
+  targetId?: string;
+  workflowId?: string;
+  toolId?: string;
+};
 
-  return prisma.workflow.upsert({
+/**
+ * Compiles a workflow and persists its Target, Workflow, and Tool rows in the
+ * demo workspace, returning the tool with its workflow and target included.
+ * Re-runnable: workflows upsert by (target, name, version) and tools by
+ * workflow. `ids` pins stable identifiers for the seeded create_vendor demo;
+ * studio-imported workflows leave them unset and get generated cuids.
+ */
+export async function upsertWorkflowTool(
+  prisma: PrismaClient,
+  params: {
+    workflow: WorkflowDefinition;
+    targetBaseUrl: string;
+    ids?: StableIds;
+  }
+) {
+  const compiled = compileToolOrThrow(params.workflow);
+  const target = await ensureTarget(prisma, {
+    name: params.workflow.target,
+    baseUrl: params.targetBaseUrl,
+    ...(params.ids?.targetId ? { id: params.ids.targetId } : {})
+  });
+
+  const workflowRow = await prisma.workflow.upsert({
     where: {
       targetId_name_version: {
         targetId: target.id,
-        name: workflow.name,
-        version: workflow.version
+        name: params.workflow.name,
+        version: params.workflow.version
       }
     },
     create: {
-      id: CREATE_VENDOR_WORKFLOW_ID,
+      ...(params.ids?.workflowId ? { id: params.ids.workflowId } : {}),
       targetId: target.id,
-      name: workflow.name,
-      version: workflow.version,
-      definition: toJsonValue(workflow),
+      name: params.workflow.name,
+      version: params.workflow.version,
+      definition: toJsonValue(params.workflow),
       contentHash: compiled.contentHash
     },
     update: {
-      definition: toJsonValue(workflow),
+      definition: toJsonValue(params.workflow),
       contentHash: compiled.contentHash
     }
   });
-}
-
-export async function ensureCreateVendorTool(
-  prisma: PrismaClient,
-  options: {
-    targetBaseUrl: string;
-    workflow?: WorkflowDefinition;
-  }
-) {
-  const workflow = options.workflow ?? createVendorWorkflowFixture();
-  const workflowRow = await ensureWorkflow(prisma, workflow, options.targetBaseUrl);
-  const compiled = compileToolOrThrow(workflow);
 
   return prisma.tool.upsert({
     where: { workflowId: workflowRow.id },
     create: {
-      id: CREATE_VENDOR_TOOL_ID,
+      ...(params.ids?.toolId ? { id: params.ids.toolId } : {}),
       workflowId: workflowRow.id,
       name: compiled.name,
       inputSchema: toJsonValue(compiled.inputSchema),
@@ -107,6 +118,26 @@ export async function ensureCreateVendorTool(
           target: true
         }
       }
+    }
+  });
+}
+
+export async function ensureCreateVendorTool(
+  prisma: PrismaClient,
+  options: {
+    targetBaseUrl: string;
+    workflow?: WorkflowDefinition;
+  }
+) {
+  const workflow = options.workflow ?? createVendorWorkflowFixture();
+
+  return upsertWorkflowTool(prisma, {
+    workflow,
+    targetBaseUrl: options.targetBaseUrl,
+    ids: {
+      targetId: DEMO_TARGET_ID,
+      workflowId: CREATE_VENDOR_WORKFLOW_ID,
+      toolId: CREATE_VENDOR_TOOL_ID
     }
   });
 }

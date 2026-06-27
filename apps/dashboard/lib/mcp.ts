@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { z } from "zod";
+import { toolInputJsonSchemaSchema } from "@agentport/core/compiler";
 import {
   parseStoredWorkflow,
   getPrismaClient,
@@ -9,18 +10,15 @@ import {
 import { invokeTool, listTools, type DashboardTool } from "./tool-service";
 
 function toolInputShape(tool: DashboardTool): Record<string, z.ZodType> {
+  const parsed = toolInputJsonSchemaSchema.safeParse(tool.inputSchema);
+  const properties = parsed.success ? parsed.data.properties : {};
   const shape: Record<string, z.ZodType> = {};
 
-  for (const [name, property] of Object.entries(
-    (tool.inputSchema as { properties?: Record<string, unknown> }).properties ?? {}
-  )) {
-    const field = property as { enum?: string[] };
-    const schema =
-      Array.isArray(field.enum) && field.enum.length > 0
-        ? z.enum(field.enum as [string, ...string[]])
+  for (const [name, property] of Object.entries(properties)) {
+    shape[name] =
+      property.enum && property.enum.length > 0
+        ? z.enum(property.enum as [string, ...string[]])
         : z.string().min(1);
-
-    shape[name] = schema;
   }
 
   return shape;

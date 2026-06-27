@@ -54,6 +54,18 @@ export {
 export { traceEventSchema, type TraceEvent } from "./trace";
 
 export {
+  applySelectorPatchToWorkflow,
+  llmSelectorResolutionSchema,
+  resolverTierSchema,
+  selectorPatchProposalSchema,
+  selectorPatchTierSchema,
+  type LlmSelectorResolution,
+  type ResolverTier,
+  type SelectorPatchTier,
+  type SelectorPatchProposal
+} from "./selector-patch";
+
+export {
   validateRecordExistsApi,
   type ValidationFetch,
   type ValidationFetchResponse

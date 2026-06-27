@@ -83,7 +83,9 @@ export function createVendorWorkflowFixture(): WorkflowDefinition {
         target: {
           role: "button",
           intent: "submit_vendor",
-          nameHints: ["Submit", "Send for Approval"]
+          nameHints: ["Submit", "Send for Approval"],
+          cachedSelector: 'role=button[name="Submit"]',
+          cacheConfidence: 0.95
         }
       },
       {

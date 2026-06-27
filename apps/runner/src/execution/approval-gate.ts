@@ -17,6 +17,7 @@ import {
 } from "./execution-state";
 import { storePendingApprovalRun, type PendingApprovalRun } from "./pending-runs";
 import { buildRunnerResult } from "./run-result";
+import { recordSelectorPatch } from "./selector-patch-recorder";
 import { recordStepScreenshot } from "./screenshot-recorder";
 import { resolveWorkflowStepTarget, waitForResolvedTarget } from "./step-executor";
 import { emitStepResolved, emitTrace } from "./trace-recorder";
@@ -40,9 +41,17 @@ export async function pauseForApproval(params: {
     tier: resolvedTarget.tier,
     selector: resolvedTarget.selector
   });
+  await recordSelectorPatch({
+    state: params.state,
+    stepId: params.step.id,
+    patch: resolvedTarget.patch
+  });
 
   const artifact = await recordStepScreenshot(params.state, params.step.id);
-  const prompt = `Approve ${params.state.request.workflow.name} step ${params.step.id}`;
+  const prompt =
+    resolvedTarget.tier === 3
+      ? `Approve selector patch and ${params.state.request.workflow.name} step ${params.step.id}`
+      : `Approve ${params.state.request.workflow.name} step ${params.step.id}`;
   const payload = {
     input: { ...params.state.request.input },
     step: {
@@ -50,7 +59,8 @@ export async function pauseForApproval(params: {
       action: params.step.action,
       risk: params.step.risk
     },
-    resolvedElement: resolvedTarget.selector
+    resolvedElement: resolvedTarget.selector,
+    selectorPatch: resolvedTarget.patch
   };
   const approval = await createApprovalRequest(prisma, {
     runId: params.state.runId,
@@ -88,6 +98,7 @@ export async function pauseForApproval(params: {
   storePendingApprovalRun({
     approvalId: approval.id,
     runId: params.state.runId,
+    workflowId: params.state.workflowId,
     request: params.state.request,
     config: params.state.config,
     context: params.state.context,

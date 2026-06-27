@@ -6,9 +6,8 @@ export {
   DEMO_TARGET_ID,
   DEMO_WORKSPACE_ID,
   ensureCreateVendorTool,
-  ensureDemoTarget,
   ensureDemoWorkspace,
-  ensureWorkflow
+  upsertWorkflowTool
 } from "./demo-data";
 export {
   completeRunStep,
@@ -26,6 +25,7 @@ export {
   getRunDetail,
   listApprovalRequests,
   listAuditEventsForRun,
+  listRecentRuns,
   markRunAwaitingApproval,
   markRunFinished,
   markRunStepAwaitingApproval,
@@ -33,6 +33,12 @@ export {
   markRunStarted,
   type RunDetail
 } from "./runs";
+export {
+  acceptSelectorPatch,
+  createSelectorPatch,
+  listSelectorPatches,
+  type SelectorPatchListItem
+} from "./selector-patches";
 export {
   cloneWorkflowInput,
   getToolWithWorkflow,

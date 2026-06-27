@@ -12,6 +12,7 @@ type WorkflowStep = WorkflowDefinition["steps"][number];
 export type PendingApprovalRun = {
   approvalId: string;
   runId: string;
+  workflowId: string;
   request: ParsedExecuteRequest;
   config: RunnerExecutionConfig;
   context: BrowserContext;
