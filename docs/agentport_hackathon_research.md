@@ -353,6 +353,13 @@ Position it as:
 
 > We turn repeated human workflows into safe, typed, tested, auditable agent tools.
 
+🔴 Direct competitors (same problem, similar approach)
+GodHands (YC, active) — A deterministic computer use layer that enables AI agents to reliably operate across browser and desktop apps, on real-world workflows even on legacy or non-API systems, without completely relying on fragile vision-based approaches. Closest conceptual competitor: same determinism promise, same legacy/enterprise target. Difference: no workflow recorder or MCP tool compiler — it's more of an execution infrastructure play. Y Combinator
+
+Cyberdesk (YC, active) — You write the task once ("Log in to X, click Y, find Z"), call their API, and the agent learns the task. Every time it repeats it, it executes 100% deterministically, upwards of 3x faster, at near-zero cost. If something unexpected happens (like a popup), the system falls back to a computer use agent and memorizes that new trajectory too. Very close to AgentPort's self-healing selector idea. Difference: focused on Windows desktop / legacy apps, not on compiling workflows into exposable MCP tools. Y Combinator
+
+Browser Use (YC W25) — Used to fill out forms, extract data behind login walls, or automate CRMs. Some developers take the xPaths Browser Use clicked on and build their scripts faster, or directly rerun the actions deterministically. Open-source, already widely adopted. Difference: no MCP tool generator layer, no audit log, no approval gate. 
+
 ### Differentiation
 
 | Existing browser-agent tools | AgentPort |
