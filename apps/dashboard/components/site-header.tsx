@@ -32,7 +32,7 @@ export function SiteHeader() {
           onClick={() => setOpen(false)}
         >
           <span className="brand-mark">
-            <img src="/logo.jpeg" alt="" width={40} height={40} />
+            <img src="/logo.svg" alt="" width={40} height={40} />
           </span>
           <span className="brand-word">Kernel</span>
         </Link>

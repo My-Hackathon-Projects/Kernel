@@ -15,7 +15,7 @@ export function SiteFooter() {
       <div className="site-footer-inner">
         <div className="site-footer-brand">
           <span className="brand-mark small">
-            <img src="/logo.jpeg" alt="" width={32} height={32} />
+            <img src="/logo.svg" alt="" width={32} height={32} />
           </span>
           <div>
             <p className="site-footer-word">Kernel</p>

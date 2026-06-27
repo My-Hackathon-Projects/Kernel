@@ -1,4 +1,5 @@
 import { type WorkflowDefinition } from "./schema";
+import { vendorCountries } from "../vendor";
 
 /**
  * The reference create_vendor workflow contract. Used by the dashboard studio
@@ -13,7 +14,11 @@ export function createVendorWorkflowFixture(): WorkflowDefinition {
     startUrl: "/vendors",
     inputs: {
       company_name: { type: "string", required: true },
-      country: { type: "string", required: true },
+      country: {
+        type: "enum",
+        values: [...vendorCountries],
+        required: true
+      },
       tax_id: { type: "string", required: true },
       risk_level: {
         type: "enum",

@@ -1,18 +1,15 @@
 import {
+  vendorCountries,
   vendorRiskLevels,
   type CreateVendorInput,
+  type VendorCountry,
   type VendorRiskLevel
 } from "@agentport/core";
 
 export type VendorFormVariant = "v1" | "v2";
 export type VendorField = keyof CreateVendorInput;
 
-export const COUNTRY_OPTIONS = [
-  "Germany",
-  "United States",
-  "France",
-  "United Kingdom"
-] as const;
+export const COUNTRY_OPTIONS = vendorCountries;
 
 /**
  * Field order per form variant. v2 deliberately reorders the inputs to exercise
@@ -42,4 +39,8 @@ export function parseVariant(value: string | string[] | undefined): VendorFormVa
 
 export function isVendorRiskLevel(value: string): value is VendorRiskLevel {
   return vendorRiskLevels.includes(value as VendorRiskLevel);
+}
+
+export function isVendorCountry(value: string): value is VendorCountry {
+  return COUNTRY_OPTIONS.includes(value as VendorCountry);
 }

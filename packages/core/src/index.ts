@@ -10,10 +10,12 @@ export {
 
 export {
   createVendorInputSchema,
+  vendorCountries,
   vendorRecordSchema,
   vendorRiskLevels,
   vendorStatuses,
   type CreateVendorInput,
+  type VendorCountry,
   type VendorRecord,
   type VendorRiskLevel,
   type VendorStatus

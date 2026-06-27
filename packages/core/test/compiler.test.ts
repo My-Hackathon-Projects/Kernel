@@ -18,7 +18,10 @@ describe("compileTool", () => {
           required: ["company_name", "country", "tax_id", "risk_level"],
           properties: {
             company_name: { type: "string" },
-            country: { type: "string" },
+            country: {
+              type: "string",
+              enum: ["Germany", "United States", "France", "United Kingdom"]
+            },
             tax_id: { type: "string" },
             risk_level: { type: "string", enum: ["low", "medium", "high"] }
           }
@@ -90,6 +93,12 @@ describe("toolInputJsonSchemaSchema", () => {
           "low",
           "medium",
           "high"
+        ]);
+        expect(parsed.data.properties.country?.enum).toEqual([
+          "Germany",
+          "United States",
+          "France",
+          "United Kingdom"
         ]);
         expect(parsed.data.properties.company_name?.enum).toBeUndefined();
       }

@@ -2,6 +2,7 @@ import { type CreateVendorInput } from "@agentport/core";
 import { type ChangeEvent, type ReactNode } from "react";
 import {
   COUNTRY_OPTIONS,
+  isVendorCountry,
   isVendorRiskLevel,
   type VendorField
 } from "../../lib/vendor-form-config";
@@ -51,9 +52,11 @@ export function VendorFormField({
             name="country"
             required
             value={form.country}
-            onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-              onChange("country", event.target.value)
-            }
+            onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+              if (isVendorCountry(event.target.value)) {
+                onChange("country", event.target.value);
+              }
+            }}
           >
             {COUNTRY_OPTIONS.map((country) => (
               <option key={country} value={country}>

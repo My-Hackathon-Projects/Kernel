@@ -17,13 +17,12 @@ test("dashboard test invoke runs the compiled tool and opens evidence", async ({
     "Acme GmbH"
   );
   await expect(page.getByLabel("Country")).toHaveValue("");
-  await expect(page.getByLabel("Country")).toHaveAttribute("placeholder", "Germany");
   await expect(page.getByLabel("Tax Id")).toHaveValue("");
   await expect(page.getByLabel("Tax Id")).toHaveAttribute("placeholder", "DE123456789");
   await expect(page.getByLabel("Risk Level")).toHaveValue("");
 
   await page.getByLabel("Company Name").fill(companyName);
-  await page.getByLabel("Country").fill("Germany");
+  await page.getByLabel("Country").selectOption("Germany");
   await page.getByLabel("Tax Id").fill("DE123456789");
   await page.getByLabel("Risk Level").selectOption("medium");
   await page.getByRole("button", { name: "Run tool" }).click();

@@ -18,7 +18,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="hero-art">
-            <img src="/logo.jpeg" alt="Kernel" />
+            <img src="/logo.svg" alt="Kernel" />
           </div>
         </section>
       </div>

@@ -44,7 +44,7 @@ type ApiError = {
 
 const FIELD_PLACEHOLDERS: Record<string, string> = {
   company_name: "Acme GmbH",
-  country: "Germany",
+  country: "Select country",
   tax_id: "DE123456789",
   risk_level: "Select risk level"
 };

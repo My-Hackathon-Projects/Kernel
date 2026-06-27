@@ -1,3 +1,4 @@
+import "./setup-browser-path.js";
 import { pathToFileURL } from "node:url";
 import { buildRunner } from "./app.js";
 import { loadRunnerEnv } from "./env-loader.js";

@@ -120,6 +120,27 @@ describe("parseExecuteRequest", () => {
     }
   });
 
+  it("rejects countries outside the target form options", () => {
+    const result = parseExecuteRequest({
+      runId: "run_123",
+      workflow: createVendorWorkflowFixture(),
+      input: {
+        company_name: "Acme GmbH",
+        country: "Neverland",
+        tax_id: "DE123456789",
+        risk_level: "low"
+      }
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.error.details?.[0]).toEqual({
+        path: "country",
+        message: "Expected one of: Germany, United States, France, United Kingdom"
+      });
+    }
+  });
+
   it("rejects unexpected input keys", () => {
     const result = parseExecuteRequest({
       runId: "run_123",

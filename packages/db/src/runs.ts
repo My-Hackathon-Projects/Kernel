@@ -60,17 +60,29 @@ export async function deleteRun(
   prisma: PrismaClient,
   runId: string
 ): Promise<string[] | null> {
-  const run = await prisma.run.findUnique({
-    where: { id: runId },
-    select: { id: true, artifacts: { select: { uri: true } } }
+  return prisma.$transaction(async (tx) => {
+    const run = await tx.run.findUnique({
+      where: { id: runId },
+      select: { id: true, artifacts: { select: { uri: true } } }
+    });
+
+    if (!run) {
+      return null;
+    }
+
+    await tx.run.delete({ where: { id: runId } });
+
+    const remaining = await tx.run.aggregate({
+      _max: { seq: true }
+    });
+    await tx.counter.upsert({
+      where: { id: "run" },
+      create: { id: "run", value: remaining._max.seq ?? RUN_SEQ_BASE },
+      update: { value: remaining._max.seq ?? RUN_SEQ_BASE }
+    });
+
+    return run.artifacts.map((artifact) => artifact.uri);
   });
-
-  if (!run) {
-    return null;
-  }
-
-  await prisma.run.delete({ where: { id: runId } });
-  return run.artifacts.map((artifact) => artifact.uri);
 }
 
 export async function ensureRunForExecution(
