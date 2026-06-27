@@ -33,7 +33,7 @@ function toolRow(name: string) {
       name,
       version: 1,
       contentHash: "0".repeat(64),
-      target: { name: "mock-procurement", baseUrl: "http://localhost:3001" }
+      target: { name: "procurement-portal", baseUrl: "http://localhost:3001" }
     }
   };
 }

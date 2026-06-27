@@ -1,8 +1,8 @@
-# AgentPort
+# Kernel
 
-AgentPort records a human web workflow once and turns it into a typed, audited
+Kernel records a human web workflow once and turns it into a typed, audited
 MCP tool that agents can call safely. An agent supplies intent and structured
-input. AgentPort executes the workflow deterministically in a real browser,
+input. Kernel executes the workflow deterministically in a real browser,
 pauses for human approval before write actions, validates the result through an
 independent channel, and stores replayable evidence.
 
@@ -19,7 +19,7 @@ flowchart TD
     Start([Start]) --> Rec["Operator records workflow once"]
     Rec --> Map["Review steps, map input fields, tag risk"]
     Map --> Comp["Compile to typed MCP tool"]
-    Comp --> Conn["Agent connects to AgentPort over MCP"]
+    Comp --> Conn["Agent connects to Kernel over MCP"]
     Conn --> Call["Agent calls tool with typed input"]
     Call --> Val0{"Input valid?"}
     Val0 -- no --> Rej0["Reject at MCP boundary, no browser starts"]
@@ -39,40 +39,6 @@ flowchart TD
     More -- no --> Validate["Validate end state"]
     Validate --> Evidence["Store evidence, return result and evidence URL"]
     Evidence --> End([End])
-```
-
-The tool call with the approval gate, end to end:
-
-```mermaid
-sequenceDiagram
-    participant Agent
-    participant MCP as MCP Endpoint
-    participant Orch as Run Orchestration
-    participant DB
-    participant Runner
-    participant Target
-    participant Human
-
-    Agent->>MCP: tools/call create_vendor(input)
-    MCP->>MCP: validate input (zod)
-    MCP->>Orch: create run
-    Orch->>DB: insert Run(status=pending)
-    Orch->>Runner: POST /execute {runId, workflow, input}
-    Runner->>Target: replay read and nav steps (Playwright)
-    Runner->>DB: insert RunStep + screenshot per step
-    Note over Runner: reaches a write step
-    Runner->>DB: insert ApprovalRequest(status=pending)
-    Runner-->>Orch: event awaiting_approval
-    Orch->>DB: update Run(status=awaiting_approval)
-    Orch-->>Agent: blocking, awaiting approval
-    Human->>Orch: POST /approvals/:id/decision approve
-    Orch->>Runner: POST /resume {runId, approvalId, approve}
-    Runner->>Target: execute write step
-    Runner->>Target: run validation probe
-    Runner->>DB: insert Validation(passed=true)
-    Runner-->>Orch: run succeeded
-    Orch->>DB: update Run(status=succeeded)
-    Orch-->>Agent: result {run_id, status, evidence_url}
 ```
 
 ## Architecture
@@ -132,7 +98,7 @@ responses or logs. `ANTHROPIC_MODEL` is optional and defaults to
 ## Commands
 
 ```bash
-pnpm dev                 # run dashboard, runner, and mock portal
+pnpm dev                 # run dashboard, runner, and procurement portal
 pnpm db:generate         # generate Prisma client
 pnpm db:push             # create or update the local SQLite schema
 pnpm lint                # ESLint with zero warnings
@@ -147,13 +113,13 @@ Default local ports:
 
 - Dashboard: <http://localhost:3000>
 - Runner: <http://127.0.0.1:4000>
-- Mock portal: <http://localhost:3001>
+- Procurement portal: <http://localhost:3001>
 
 ## Workflow studio
 
 The studio is the recorder path for this build. Instead of a browser extension,
 you bring a workflow JSON (start from Playwright `codegen` output and hand-edit
-it into the AgentPort shape), and the dashboard compiles it into a registered
+it into the Kernel shape), and the dashboard compiles it into a registered
 tool.
 
 1. Open <http://localhost:3000/studio>.
@@ -211,7 +177,7 @@ Dashboard pages: `/` (invoke, approvals, studio), `/studio`, `/tools`, `/runs`,
 ### Runner
 
 `POST /execute` accepts `{ runId, workflow, input }`, validates the payload
-against `packages/core`, drives the mock portal in Playwright, pauses before
+against `packages/core`, drives the procurement portal in Playwright, pauses before
 write-risk steps, persists each `RunStep`, captures screenshot artifacts, emits
 trace events, records selector patches, and returns the typed execution result.
 Target resolution uses tier 1 cached selectors, tier 2 role and accessible-name
@@ -220,10 +186,10 @@ validation and tested selectors.
 
 `POST /resume` accepts `{ runId, approvalId, decision }`. Approval clicks the
 paused write target, continues execution, validates the created record through
-the mock portal API, and returns `succeeded` or `validation_failed`. Rejection
+the procurement portal API, and returns `succeeded` or `validation_failed`. Rejection
 ends the run with no write action.
 
-### Mock portal
+### Procurement portal
 
 - `/vendors` lists created vendors.
 - `/vendors/new` creates a vendor through `POST /api/vendors`.
@@ -250,7 +216,7 @@ Implemented:
 
 - M0: monorepo foundation, strict TypeScript, quality gates, shared workflow
   schema, dashboard validator, runner shell, Prisma schema.
-- M1: mock procurement portal, vendor API, selector-resilience variant, injection
+- M1: procurement portal, vendor API, selector-resilience variant, injection
   bait coverage.
 - M2: deterministic Playwright runner, persisted run and step records, screenshot
   artifacts, runner API validation.

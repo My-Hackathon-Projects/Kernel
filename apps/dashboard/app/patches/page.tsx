@@ -2,6 +2,8 @@ import Link from "next/link";
 import { PatchReview } from "../../components/patch-review";
 import { getSelectorPatches } from "../../lib/patch-service";
 
+export const dynamic = "force-dynamic";
+
 export default async function PatchesPage() {
   const patches = await getSelectorPatches();
   const patchSummaries = patches.map((patch) => ({
@@ -24,7 +26,7 @@ export default async function PatchesPage() {
       <div className="shell">
         <section className="panel run-summary">
           <Link href="/" className="back-link">
-            Back to Dashboard
+            Back to home
           </Link>
           <div>
             <p className="eyebrow">Resolver</p>

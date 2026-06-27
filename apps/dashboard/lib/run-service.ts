@@ -1,9 +1,29 @@
-import { getPrismaClient, getRunDetail, listRecentRuns } from "@agentport/db";
+import { unlink } from "node:fs/promises";
+import {
+  deleteRun,
+  getPrismaClient,
+  getRunDetail,
+  listRecentRuns
+} from "@agentport/db";
 
 export async function getRun(runId: string) {
   return getRunDetail(getPrismaClient(), runId);
 }
 
-export async function getRecentRuns(limit = 20) {
+export async function getRecentRuns(limit = 50) {
   return listRecentRuns(getPrismaClient(), limit);
+}
+
+/**
+ * Deletes a run and removes its stored screenshot files. Returns false when the
+ * run does not exist so the route can answer 404.
+ */
+export async function deleteRunById(runId: string): Promise<boolean> {
+  const artifactUris = await deleteRun(getPrismaClient(), runId);
+  if (artifactUris === null) {
+    return false;
+  }
+
+  await Promise.all(artifactUris.map((uri) => unlink(uri).catch(() => undefined)));
+  return true;
 }

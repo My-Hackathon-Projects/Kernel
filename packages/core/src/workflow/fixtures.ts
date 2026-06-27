@@ -1,15 +1,15 @@
 import { type WorkflowDefinition } from "./schema";
 
 /**
- * The reference create_vendor workflow contract. Used by the dashboard validator
- * UI, the runner execute tests, and as the canonical example of the semantic
- * workflow shape until the M2 recorder produces real definitions.
+ * The reference create_vendor workflow contract. Used by the dashboard studio
+ * sample, the runner execute tests, and as the canonical example of the semantic
+ * workflow shape.
  */
 export function createVendorWorkflowFixture(): WorkflowDefinition {
   return {
     name: "create_vendor",
     version: 1,
-    target: "mock-procurement",
+    target: "procurement-portal",
     startUrl: "/vendors",
     inputs: {
       company_name: { type: "string", required: true },

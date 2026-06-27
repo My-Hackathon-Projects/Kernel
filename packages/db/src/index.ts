@@ -19,6 +19,7 @@ export {
   createTraceEvent,
   createValidation,
   decideApprovalRequest,
+  deleteRun,
   ensureRunForExecution,
   failRunStep,
   getApprovalRequest,

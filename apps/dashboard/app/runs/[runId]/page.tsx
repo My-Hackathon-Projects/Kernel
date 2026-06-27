@@ -83,16 +83,24 @@ export default async function RunPage({ params }: RunPageProps) {
       <div className="shell">
         <section className="panel run-summary">
           <Link href="/runs" className="back-link">
-            Back to Dashboard
+            Back to runs
           </Link>
           <div>
             <p className="eyebrow">Run</p>
-            <h1>{run.id}</h1>
+            <h1>{run.seq !== null ? `#${run.seq}` : run.id}</h1>
           </div>
           <dl className="run-meta">
             <div>
               <dt>Status</dt>
-              <dd>{run.status}</dd>
+              <dd>
+                <span className={`status-pill ${run.status}`}>
+                  {run.status.replace(/_/g, " ")}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt>Run ID</dt>
+              <dd className="mono">{run.id}</dd>
             </div>
             <div>
               <dt>Tool</dt>

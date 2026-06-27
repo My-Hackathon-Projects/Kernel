@@ -13,9 +13,27 @@ import { cloneWorkflowInput } from "./tools";
 
 export type RunDetail = Awaited<ReturnType<typeof getRunDetail>>;
 
-export async function listRecentRuns(prisma: PrismaClient, limit = 20) {
+const RUN_SEQ_BASE = 100000;
+
+/**
+ * Allocates the next sequential, human-readable run number. SQLite reserves
+ * `autoincrement()` for primary keys, so we keep a dedicated counter row and
+ * rely on an atomic `increment` update, which stays unique under the parallel
+ * runs the E2E suite creates.
+ */
+async function nextRunSeq(prisma: PrismaClient): Promise<number> {
+  const counter = await prisma.counter.upsert({
+    where: { id: "run" },
+    create: { id: "run", value: RUN_SEQ_BASE + 1 },
+    update: { value: { increment: 1 } }
+  });
+
+  return counter.value;
+}
+
+export async function listRecentRuns(prisma: PrismaClient, limit = 50) {
   return prisma.run.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ seq: "desc" }, { createdAt: "desc" }],
     take: limit,
     include: {
       tool: {
@@ -29,6 +47,30 @@ export async function listRecentRuns(prisma: PrismaClient, limit = 20) {
       }
     }
   });
+}
+
+/**
+ * Deletes a run and its cascaded children (steps, approvals, validations,
+ * artifacts). Audit events and selector patches keep their rows with the run
+ * reference nulled, so the append-only audit trail is preserved. Returns the
+ * stored artifact URIs so the caller can remove the screenshot files, or null
+ * when the run does not exist.
+ */
+export async function deleteRun(
+  prisma: PrismaClient,
+  runId: string
+): Promise<string[] | null> {
+  const run = await prisma.run.findUnique({
+    where: { id: runId },
+    select: { id: true, artifacts: { select: { uri: true } } }
+  });
+
+  if (!run) {
+    return null;
+  }
+
+  await prisma.run.delete({ where: { id: runId } });
+  return run.artifacts.map((artifact) => artifact.uri);
 }
 
 export async function ensureRunForExecution(
@@ -45,10 +87,17 @@ export async function ensureRunForExecution(
     workflow: params.workflow
   });
 
+  const existing = await prisma.run.findUnique({
+    where: { id: params.runId },
+    select: { id: true }
+  });
+  const seq = existing ? undefined : await nextRunSeq(prisma);
+
   return prisma.run.upsert({
     where: { id: params.runId },
     create: {
       id: params.runId,
+      ...(seq !== undefined ? { seq } : {}),
       toolId: tool.id,
       workflowVersion: params.workflow.version,
       input: toJsonValue(cloneWorkflowInput(params.input)),
@@ -76,6 +125,7 @@ export async function createRunForTool(
 ) {
   return prisma.run.create({
     data: {
+      seq: await nextRunSeq(prisma),
       toolId: params.toolId,
       workflowVersion: params.workflowVersion,
       input: toJsonValue(cloneWorkflowInput(params.input)),

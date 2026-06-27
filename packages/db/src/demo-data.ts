@@ -4,7 +4,7 @@ import { type PrismaClient } from "@prisma/client";
 import { toJsonValue } from "./json";
 
 export const DEMO_WORKSPACE_ID = "workspace_demo";
-export const DEMO_TARGET_ID = "target_mock_procurement";
+export const DEMO_TARGET_ID = "target_procurement_portal";
 export const CREATE_VENDOR_WORKFLOW_ID = "workflow_create_vendor_v1";
 export const CREATE_VENDOR_TOOL_ID = "tool_create_vendor";
 

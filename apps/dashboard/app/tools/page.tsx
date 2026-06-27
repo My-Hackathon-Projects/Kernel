@@ -3,6 +3,8 @@ import Link from "next/link";
 import { resolveDashboardConfig } from "../../lib/config";
 import { listTools, type DashboardTool } from "../../lib/tool-service";
 
+export const dynamic = "force-dynamic";
+
 function inputFields(tool: DashboardTool): string[] {
   const parsed = toolInputJsonSchemaSchema.safeParse(tool.inputSchema);
   if (!parsed.success) {
@@ -23,7 +25,7 @@ export default async function ToolsPage() {
       <div className="shell">
         <section className="panel run-summary">
           <Link href="/" className="back-link">
-            Back to Dashboard
+            Back to home
           </Link>
           <div>
             <p className="eyebrow">Registry</p>

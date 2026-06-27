@@ -10,7 +10,7 @@ test("dashboard test invoke runs the compiled tool and opens evidence", async ({
 }, testInfo) => {
   const companyName = uniqueCompanyName("Dashboard Vendor", testInfo);
 
-  await page.goto("/");
+  await page.goto("/console");
   await expect(page.getByLabel("Company Name")).toHaveValue("");
   await expect(page.getByLabel("Company Name")).toHaveAttribute(
     "placeholder",
@@ -162,6 +162,48 @@ test("workflow studio compiles an imported workflow into a callable tool", async
     data: { decision: "reject" }
   });
   expect(rejectResponse.status()).toBe(200);
+});
+
+test("runs carry a sequential number and can be deleted from the record", async ({
+  request
+}, testInfo) => {
+  const companyName = uniqueCompanyName("Delete Vendor", testInfo);
+  const invokeResponse = await request.post("/api/tools/tool_create_vendor/runs", {
+    data: {
+      input: {
+        company_name: companyName,
+        country: "Germany",
+        tax_id: "DE123456789",
+        risk_level: "medium"
+      }
+    }
+  });
+  expect(invokeResponse.status()).toBe(202);
+  const runId = ((await invokeResponse.json()) as { run_id: string }).run_id;
+
+  const approvalsResponse = await request.get("/api/approvals");
+  const approvals = (
+    (await approvalsResponse.json()) as {
+      approvals: Array<{ id: string; payload: { input?: Record<string, unknown> } }>;
+    }
+  ).approvals;
+  const approval = approvals.find(
+    (candidate) => candidate.payload.input?.company_name === companyName
+  );
+  await request.post(`/api/approvals/${approval?.id}/decision`, {
+    data: { decision: "reject" }
+  });
+
+  const detailResponse = await request.get(`/api/runs/${runId}`);
+  const detail = (await detailResponse.json()) as { run: { seq: number | null } };
+  expect(typeof detail.run.seq).toBe("number");
+  expect(detail.run.seq).toBeGreaterThan(100000);
+
+  const deleteResponse = await request.delete(`/api/runs/${runId}`);
+  expect(deleteResponse.status()).toBe(200);
+
+  const afterResponse = await request.get(`/api/runs/${runId}`);
+  expect(afterResponse.status()).toBe(404);
 });
 
 test("tool invoke API rejects invalid input before execution", async ({ request }) => {

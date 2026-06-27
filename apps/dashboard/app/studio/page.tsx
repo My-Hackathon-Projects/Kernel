@@ -7,7 +7,7 @@ export default function StudioPage() {
       <div className="shell">
         <section className="panel run-summary">
           <Link href="/" className="back-link">
-            Back to Dashboard
+            Back to home
           </Link>
           <div>
             <p className="eyebrow">Recorder</p>

@@ -97,9 +97,9 @@ export function WorkflowStudio() {
         <span>Import and compile</span>
       </div>
       <p className="muted">
-        Paste a workflow JSON (start from Playwright codegen, hand-edited into the
-        AgentPort shape). Validate the contract, then compile it into a typed tool that
-        is exposed over MCP and listed in the registry.
+        Paste a workflow JSON (start from a recorded session, hand-edited into the
+        Kernel shape). Validate the contract, then compile it into a typed tool that is
+        exposed over MCP and listed in the registry.
       </p>
       <textarea
         aria-label="Workflow JSON"

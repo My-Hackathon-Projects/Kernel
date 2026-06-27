@@ -59,8 +59,14 @@ model Tool {
   updatedAt   DateTime  @updatedAt
 }
 
+model Counter {
+  id    String @id
+  value Int    @default(0)
+}
+
 model Run {
   id              String            @id @default(cuid())
+  seq             Int?              @unique
   toolId          String
   workflowVersion Int
   input           Json
