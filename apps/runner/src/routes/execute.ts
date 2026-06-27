@@ -1,12 +1,20 @@
-import { parseExecuteRequest } from "@agentport/core";
+import { apiError, parseExecuteRequest } from "@agentport/core";
 import { type FastifyInstance } from "fastify";
+import {
+  createWorkflowExecutor,
+  type ExecuteWorkflow
+} from "../execution/workflow-executor";
 
-/**
- * Accepts a runner execute request and validates it against the shared workflow
- * contract. M1 stops at validation and returns 202; deterministic Playwright
- * execution lands in M2.
- */
-export async function executeRoutes(app: FastifyInstance): Promise<void> {
+type ExecuteRouteOptions = {
+  executeWorkflow?: ExecuteWorkflow;
+};
+
+export async function executeRoutes(
+  app: FastifyInstance,
+  options: ExecuteRouteOptions = {}
+): Promise<void> {
+  const executeWorkflow = options.executeWorkflow ?? createWorkflowExecutor();
+
   app.post("/execute", async (request, reply) => {
     const parsed = parseExecuteRequest(request.body);
 
@@ -14,11 +22,16 @@ export async function executeRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(400).send(parsed.error);
     }
 
-    return reply.status(202).send({
-      runId: parsed.data.runId,
-      status: "accepted",
-      message:
-        "Runner scaffold validated the request. Playwright execution lands in M2."
-    });
+    try {
+      return reply.status(200).send(await executeWorkflow(parsed.data));
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Workflow execution failed";
+      request.log.error(
+        { err: error, runId: parsed.data.runId },
+        "Workflow execution failed"
+      );
+      return reply.status(500).send(apiError("execution_failed", message));
+    }
   });
 }

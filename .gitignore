@@ -4,6 +4,7 @@ node_modules/
 .pnp.js
 .pnpm-store/
 .npm-cache/
+.tmp/
 .yarn/cache
 .yarn/unplugged
 
@@ -38,6 +39,7 @@ test-results/
 
 # Caches
 .cache/
+.tmp/
 .eslintcache
 .parcel-cache/
 

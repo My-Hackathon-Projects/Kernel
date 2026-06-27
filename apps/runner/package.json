@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@agentport/core": "workspace:*",
+    "@agentport/db": "workspace:*",
     "fastify": "5.8.5",
+    "playwright": "1.61.1",
     "zod": "4.4.3"
   },
   "devDependencies": {

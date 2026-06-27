@@ -17,7 +17,7 @@ describe("POST /api/workflows/validate", () => {
       workflow: {
         name: "create_vendor",
         version: 1,
-        stepCount: 5
+        stepCount: 8
       }
     });
   });

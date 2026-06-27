@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@agentport/core": "workspace:*",
     "@prisma/client": "6.19.3"
   },
   "devDependencies": {

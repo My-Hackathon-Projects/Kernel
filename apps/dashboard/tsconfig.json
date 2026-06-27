@@ -11,6 +11,7 @@
     "app/**/*.tsx",
     "components/**/*.ts",
     "components/**/*.tsx",
+    "lib/**/*.ts",
     "test/**/*.ts",
     "next.config.mjs"
   ],

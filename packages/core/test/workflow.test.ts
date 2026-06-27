@@ -14,19 +14,20 @@ describe("workflowDefinitionSchema", () => {
 
   it("rejects a step field that is not declared as an input", () => {
     const workflow = createVendorWorkflowFixture();
-    const step = workflow.steps[1];
+    const stepIndex = workflow.steps.findIndex((step) => step.action === "fill");
+    const step = workflow.steps[stepIndex];
 
     if (!step || step.action !== "fill") {
-      throw new Error("Expected fixture step s2 to be a fill step");
+      throw new Error("Expected fixture to contain a fill step");
     }
 
-    workflow.steps[1] = { ...step, field: "unknown_field" };
+    workflow.steps[stepIndex] = { ...step, field: "unknown_field" };
 
     const result = workflowDefinitionSchema.safeParse(workflow);
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0]?.path).toEqual(["steps", 1, "field"]);
+      expect(result.error.issues[0]?.path).toEqual(["steps", stepIndex, "field"]);
     }
   });
 

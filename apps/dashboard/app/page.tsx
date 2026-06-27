@@ -1,3 +1,4 @@
+import { ToolInvoker } from "../components/tool-invoker";
 import { WorkflowValidator } from "../components/workflow-validator";
 
 export default function DashboardPage() {
@@ -7,10 +8,12 @@ export default function DashboardPage() {
         <section className="panel summary">
           <h1>AgentPort</h1>
           <p>
-            M0 is the project foundation: shared workflow contracts, validated API
-            boundaries, a runner service shell, the mock portal shell, and quality gates
-            that future milestones build on.
+            AgentPort compiles a recorded browser workflow into a typed tool, executes
+            it through the runner, validates the result, and stores replayable evidence.
           </p>
+        </section>
+        <section className="panel">
+          <ToolInvoker />
         </section>
         <section className="panel">
           <WorkflowValidator />

@@ -3,84 +3,65 @@
 AgentPort records a human web workflow once and turns it into a typed, audited
 MCP tool that agents can call safely.
 
-This repository is now scaffolded through the M1 milestone. It includes the
-workspace, app shells, shared contracts, database schema, validated APIs, the
-mock vendor portal flow, Vitest coverage, Playwright E2E coverage, and CI. The
-deterministic Playwright runner lands in M2.
+The repository is implemented through M3. It includes the mock procurement
+portal, shared workflow contracts, a deterministic Playwright runner, persisted
+run evidence, the dashboard Test Invoke path, and an MCP Streamable HTTP endpoint
+for the compiled `create_vendor` tool.
 
 ## Repository Layout
-
-The repository uses one convention across apps: `app/` for routes and API route
-handlers, `components/` and `hooks/` for front-end UI and client state, and `lib/`
-for data access and configuration.
 
 ```text
 apps/
   dashboard/                Next.js control plane
-    app/                    routes, layouts, and the validate API handler
-    components/             workflow validator UI
+    app/                    pages, API handlers, MCP endpoint, run evidence pages
+    components/             workflow validator and Test Invoke UI
+    lib/                    dashboard config, tool invocation, validation, MCP setup
   runner/                   Fastify execution service
-    src/app.ts              composition root
     src/routes/             health and execute route plugins
+    src/execution/          Playwright browser, target resolver, artifacts, executor
   mock-portal/              Next.js demo target app
-    app/                    routes and the vendor API handler
-    components/vendors/      vendor form, split into focused components
+    app/                    vendor pages and validation API
+    components/vendors/     vendor form and created summary
     hooks/                  client form state and submission
     lib/                    in-memory vendor store and form config
 packages/
-  core/                     shared contracts (single source of truth)
-    src/primitives.ts       shared zod building blocks
-    src/vendor.ts           vendor schemas
-    src/api-error.ts        typed API error envelope and helpers
-    src/workflow/           workflow schema, input parser, and fixture
-  db/                       Prisma client export (wired in M2+)
+  core/                     shared zod contracts, workflow parser, compiler, fixtures
+  db/                       Prisma client, demo seed helpers, run/tool repositories
 prisma/
-  schema.prisma             control-plane data model for local SQLite
-```
-
-## Prerequisites
-
-- Node.js 24
-- pnpm 9.15.9
-
-If pnpm is not installed, install it with:
-
-```bash
-npm install --global pnpm@9.15.9
+  schema.prisma             local SQLite control-plane data model
+scripts/
+  prepare-e2e.ts            isolated E2E database and artifact setup
+  mcp-create-vendor.ts      external MCP smoke client
 ```
 
 ## Setup
+
+Prerequisites: Node.js 24 and `pnpm@9.15.9`.
 
 ```bash
 pnpm install
 cp .env.example .env
 pnpm db:generate
+pnpm db:push
 pnpm playwright:install
 ```
 
 The local database defaults to SQLite through `DATABASE_URL="file:./dev.db"`.
-The M1 mock portal uses an in-memory vendor store for the current Node process.
+Run screenshots are stored under `ARTIFACT_ROOT`, which defaults to
+`.tmp/artifacts` in the E2E harness.
 
 ## Commands
 
 ```bash
-pnpm dev          # run dashboard, runner, and mock portal in parallel
-pnpm lint         # eslint across the workspace
-pnpm typecheck    # TypeScript checks for all apps and packages
-pnpm test         # Vitest tests
-pnpm playwright:install # install Chromium for Playwright
-pnpm test:e2e     # Playwright tests against the mock portal
-pnpm db:validate  # validate prisma/schema.prisma
-pnpm build        # production builds for apps and package build checks
-pnpm check        # format, lint, typecheck, tests, E2E, Prisma validation, and build
-```
-
-App-specific dev commands:
-
-```bash
-pnpm --filter @agentport/dashboard dev
-pnpm --filter @agentport/runner dev
-pnpm --filter @agentport/mock-portal dev
+pnpm dev                 # run dashboard, runner, and mock portal
+pnpm db:generate         # generate Prisma client
+pnpm db:push             # create or update the local SQLite schema
+pnpm lint                # ESLint with zero warnings
+pnpm typecheck           # strict TypeScript across all packages
+pnpm test                # Vitest unit and route tests
+pnpm test:e2e            # Playwright against dashboard, runner, and portal
+pnpm mcp:create-vendor   # external MCP client smoke call
+pnpm check               # full local quality gate
 ```
 
 Default local ports:
@@ -91,130 +72,72 @@ Default local ports:
 
 ## Current API Surface
 
-M0 and M1 include these validated boundaries.
+### Dashboard
 
-### Dashboard Workflow Validation
-
-`POST /api/workflows/validate`
-
-Validates a workflow JSON payload against the shared semantic workflow schema.
-The dashboard home page calls this endpoint from the browser.
-
-Successful response:
+- `POST /api/workflows/validate` validates workflow JSON and returns metadata.
+- `GET /api/tools` lists enabled compiled tools.
+- `GET /api/tools/:toolId` returns one compiled tool.
+- `POST /api/tools/:toolId/runs` validates input, creates a run, calls the
+  runner, validates the end state, and returns:
 
 ```json
 {
-  "valid": true,
-  "workflow": {
-    "name": "create_vendor",
-    "version": 1,
-    "stepCount": 5
-  }
+  "run_id": "cmq...",
+  "status": "succeeded",
+  "validation": { "passed": true },
+  "evidence_url": "http://localhost:3000/runs/cmq..."
 }
 ```
 
-Validation failures use a typed error shape:
+- `GET /api/runs/:runId` returns run details, ordered steps, validations, and
+  artifacts.
+- `GET /api/runs/:runId/artifacts/:artifactId` returns stored screenshots.
+- `/mcp` exposes the MCP Streamable HTTP endpoint.
 
-```json
-{
-  "error": {
-    "code": "validation_failed",
-    "message": "Request validation failed",
-    "details": [
-      { "path": "steps", "message": "Too small: expected array to have >=1 items" }
-    ]
-  }
-}
-```
+### Runner
 
-### Runner Health and Execute Stub
+`POST /execute` accepts `{ runId, workflow, input }`, validates the payload
+against `packages/core`, drives the mock portal in Playwright, persists each
+`RunStep`, captures a screenshot artifact for each step, and returns the typed
+execution result.
 
-`GET /health`
-
-Returns service health for the runner.
-
-`POST /execute`
-
-Validates the internal runner request shape:
-
-```json
-{
-  "runId": "run_123",
-  "workflow": {},
-  "input": {}
-}
-```
-
-For valid requests, M0 returns `202 accepted` with a scaffold message. Browser
-execution is intentionally deferred to M2.
-
-### Mock Portal Vendor API
-
-`POST /api/vendors`
-
-Creates a vendor in the mock procurement portal. Request fields match the M0
-workflow fixture:
-
-```json
-{
-  "company_name": "Acme GmbH",
-  "country": "Germany",
-  "tax_id": "DE123456789",
-  "risk_level": "medium"
-}
-```
-
-Successful response:
-
-```json
-{
-  "id": "generated-id",
-  "company_name": "Acme GmbH",
-  "country": "Germany",
-  "tax_id": "DE123456789",
-  "risk_level": "medium",
-  "status": "Pending Approval",
-  "createdAt": "2026-06-27T00:00:00.000Z"
-}
-```
-
-`GET /api/vendors` returns `{ "vendors": [...] }`.
-
-`GET /api/vendors?company_name=Acme` returns the matching vendor record, or a
-typed `404` error when no vendor matches.
-
-## Mock Portal Workflow
+### Mock Portal
 
 - `/vendors` lists created vendors.
-- `/vendors/new` creates a vendor through the validated API and shows `Vendor created`.
-- `/vendors/new?variant=v2` reorders the form and renames the submit button to `Send for Approval`.
-- The new-vendor page includes an inert injection bait notice. Submitted values
-  come only from form controls.
+- `/vendors/new` creates a vendor through `POST /api/vendors`.
+- `/vendors/new?variant=v2` reorders the form and renames the submit button.
+- `GET /api/vendors?company_name=Acme` is the independent validation channel.
 
-## Milestone Scope
+The vendor page includes inert injection bait. Submitted values come from the
+validated workflow input, not page text.
 
-Implemented in M0:
+## MCP Smoke Client
 
-- pnpm workspace with Turbo task orchestration.
-- Strict TypeScript across all apps and packages.
-- ESLint, Prettier, Vitest, Prisma schema validation, and GitHub Actions CI.
-- Next.js dashboard shell with a connected workflow validation form.
-- Fastify runner shell with validated health and execute endpoints.
-- Next.js mock portal shell.
-- Shared workflow, input, and runner request schemas in `packages/core`.
-- Prisma schema for the MVP entities.
+With the three services running, call the compiled tool from a separate process:
 
-Implemented in M1:
+```bash
+AGENTPORT_MCP_URL=http://localhost:3000/mcp pnpm mcp:create-vendor
+```
 
-- Mock procurement portal vendor list and create form.
-- `GET` and `POST /api/vendors` with strict input validation.
-- Shared vendor contracts in `packages/core`.
-- `?variant=v2` selector-resilience surface for the vendor form.
-- Inert injection bait coverage.
-- Playwright E2E tests for the browser workflow and validation API.
+The script discovers `create_vendor`, calls it with typed arguments, and prints
+the MCP tool result as JSON.
+
+## Milestone Status
+
+Implemented:
+
+- M0: monorepo foundation, strict TypeScript, quality gates, shared workflow
+  schema, dashboard validator, runner shell, Prisma schema.
+- M1: mock procurement portal, vendor API, selector-resilience variant, injection
+  bait coverage.
+- M2: deterministic Playwright runner, persisted run and step records, screenshot
+  artifacts, runner API validation.
+- M3: workflow compiler, persisted tool seed, dashboard Test Invoke path, MCP
+  Streamable HTTP endpoint, external MCP client script.
 
 Not implemented yet:
 
-- Playwright execution and screenshot artifacts.
-- MCP endpoint and tool compiler.
-- Approval gate, validation run result, trace viewer, self-healing, and recorder.
+- Human approval pause and resume.
+- Live trace streaming.
+- Selector patch review and semantic fallback.
+- Recorder UI.

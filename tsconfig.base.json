@@ -12,6 +12,7 @@
     "noUncheckedIndexedAccess": true,
     "paths": {
       "@agentport/core": ["./packages/core/src/index.ts"],
+      "@agentport/core/*": ["./packages/core/src/*"],
       "@agentport/db": ["./packages/db/src/index.ts"]
     },
     "resolveJsonModule": true,

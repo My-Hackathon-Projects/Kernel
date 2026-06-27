@@ -5,6 +5,23 @@
 
 ---
 
+## Current implementation status
+
+The codebase is implemented through M3:
+
+- M0 and M1 provide the monorepo, shared contracts, mock procurement portal,
+  validated vendor API, and selector-resilience variant.
+- M2 provides the deterministic Playwright runner, persisted `Run` and
+  `RunStep` records, and screenshot artifacts per workflow step.
+- M3 provides the workflow compiler, seeded `create_vendor` tool, dashboard
+  Test Invoke path, MCP Streamable HTTP endpoint, and external MCP client smoke
+  script.
+
+Approval pause/resume, live trace streaming, selector patch review, semantic
+fallback, and recorder UI remain future milestones.
+
+---
+
 ## 0. How to use this doc
 
 - **Sections 1–4** are shared context. Read once. Everyone.
