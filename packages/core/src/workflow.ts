@@ -1,14 +1,10 @@
-import { z, type ZodError } from "zod";
-
-export type ApiErrorBody = {
-  error: {
-    code: string;
-    message: string;
-    details?: ApiErrorDetail[];
-  };
-};
-
-type ApiErrorDetail = { path: string; message: string };
+import { z } from "zod";
+import {
+  formatZodError,
+  validationError,
+  type ApiErrorBody,
+  type ApiErrorDetail
+} from "./api-error";
 
 const nonEmptyString = z.string().trim().min(1);
 const relativePathString = nonEmptyString
@@ -156,25 +152,6 @@ export type WorkflowDefinition = z.infer<typeof workflowDefinitionSchema>;
 export type ExecuteRequest = z.infer<typeof executeRequestSchema>;
 export type WorkflowInput = Readonly<Record<string, string>>;
 export type ParsedExecuteRequest = ExecuteRequest & { input: WorkflowInput };
-
-function validationError(details: ApiErrorDetail[]): ApiErrorBody {
-  return {
-    error: {
-      code: "validation_failed",
-      message: "Request validation failed",
-      details
-    }
-  };
-}
-
-export function formatZodError(error: ZodError): ApiErrorBody {
-  return validationError(
-    error.issues.map((issue) => ({
-      path: issue.path.join(".") || "(root)",
-      message: issue.message
-    }))
-  );
-}
 
 export function parseWorkflowInput(
   workflow: WorkflowDefinition,

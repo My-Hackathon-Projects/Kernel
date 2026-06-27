@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@agentport/core": "workspace:*",
     "next": "16.2.9",
     "react": "19.2.7",
     "react-dom": "19.2.7"

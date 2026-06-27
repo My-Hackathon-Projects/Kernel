@@ -1,12 +1,18 @@
+import Link from "next/link";
+
 export default function MockPortalPage() {
   return (
     <main>
       <section className="portal-shell">
-        <h1>Mock Procurement Portal</h1>
-        <p>
-          M0 provides the application shell. The vendor onboarding form and independent
-          validation API are implemented in M1.
-        </p>
+        <div className="page-header">
+          <div>
+            <p className="eyebrow">AgentPort demo target</p>
+            <h1>Mock Procurement Portal</h1>
+          </div>
+          <Link className="button primary" href="/vendors">
+            Vendors
+          </Link>
+        </div>
       </section>
     </main>
   );

@@ -5,6 +5,7 @@ export default tseslint.config(
   {
     ignores: [
       ".next/**",
+      ".cache/**",
       ".turbo/**",
       "**/.next/**",
       "**/.turbo/**",

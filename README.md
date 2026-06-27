@@ -3,10 +3,10 @@
 AgentPort records a human web workflow once and turns it into a typed, audited
 MCP tool that agents can call safely.
 
-This repository is now scaffolded for the M0 milestone. It includes the
-workspace, app shells, shared contracts, database schema, API validation stubs,
-tests, and CI. The deterministic Playwright runner and mock vendor portal flow
-land in later milestones.
+This repository is now scaffolded through the M1 milestone. It includes the
+workspace, app shells, shared contracts, database schema, validated APIs, the
+mock vendor portal flow, Vitest coverage, Playwright E2E coverage, and CI. The
+deterministic Playwright runner lands in M2.
 
 ## Repository Layout
 
@@ -14,9 +14,9 @@ land in later milestones.
 apps/
   dashboard/    Next.js control-plane UI and API routes
   runner/       Fastify service shell for browser execution
-  mock-portal/  Next.js target app shell for the demo portal
+  mock-portal/  Next.js target app and vendor onboarding flow
 packages/
-  core/         Workflow contracts, zod schemas, validation helpers
+  core/         Workflow and vendor contracts, zod schemas, validation helpers
   db/           Prisma client export
 prisma/
   schema.prisma MVP data model for local SQLite
@@ -39,9 +39,11 @@ npm install --global pnpm@9.15.9
 pnpm install
 cp .env.example .env
 pnpm db:generate
+pnpm playwright:install
 ```
 
 The local database defaults to SQLite through `DATABASE_URL="file:./dev.db"`.
+The M1 mock portal uses an in-memory vendor store for the current Node process.
 
 ## Commands
 
@@ -50,9 +52,11 @@ pnpm dev          # run dashboard, runner, and mock portal in parallel
 pnpm lint         # eslint across the workspace
 pnpm typecheck    # TypeScript checks for all apps and packages
 pnpm test         # Vitest tests
+pnpm playwright:install # install Chromium for Playwright
+pnpm test:e2e     # Playwright tests against the mock portal
 pnpm db:validate  # validate prisma/schema.prisma
 pnpm build        # production builds for apps and package build checks
-pnpm check        # format, lint, typecheck, test, Prisma validation, and build
+pnpm check        # format, lint, typecheck, tests, E2E, Prisma validation, and build
 ```
 
 App-specific dev commands:
@@ -71,7 +75,7 @@ Default local ports:
 
 ## Current API Surface
 
-M0 includes two validated boundaries that later milestones build on.
+M0 and M1 include these validated boundaries.
 
 ### Dashboard Workflow Validation
 
@@ -128,6 +132,49 @@ Validates the internal runner request shape:
 For valid requests, M0 returns `202 accepted` with a scaffold message. Browser
 execution is intentionally deferred to M2.
 
+### Mock Portal Vendor API
+
+`POST /api/vendors`
+
+Creates a vendor in the mock procurement portal. Request fields match the M0
+workflow fixture:
+
+```json
+{
+  "company_name": "Acme GmbH",
+  "country": "Germany",
+  "tax_id": "DE123456789",
+  "risk_level": "medium"
+}
+```
+
+Successful response:
+
+```json
+{
+  "id": "generated-id",
+  "company_name": "Acme GmbH",
+  "country": "Germany",
+  "tax_id": "DE123456789",
+  "risk_level": "medium",
+  "status": "Pending Approval",
+  "createdAt": "2026-06-27T00:00:00.000Z"
+}
+```
+
+`GET /api/vendors` returns `{ "vendors": [...] }`.
+
+`GET /api/vendors?company_name=Acme` returns the matching vendor record, or a
+typed `404` error when no vendor matches.
+
+## Mock Portal Workflow
+
+- `/vendors` lists created vendors.
+- `/vendors/new` creates a vendor through the validated API and shows `Vendor created`.
+- `/vendors/new?variant=v2` reorders the form and renames the submit button to `Send for Approval`.
+- The new-vendor page includes an inert injection bait notice. Submitted values
+  come only from form controls.
+
 ## Milestone Scope
 
 Implemented in M0:
@@ -141,9 +188,17 @@ Implemented in M0:
 - Shared workflow, input, and runner request schemas in `packages/core`.
 - Prisma schema for the MVP entities.
 
-Not implemented in M0:
+Implemented in M1:
 
-- Mock vendor creation flow.
+- Mock procurement portal vendor list and create form.
+- `GET` and `POST /api/vendors` with strict input validation.
+- Shared vendor contracts in `packages/core`.
+- `?variant=v2` selector-resilience surface for the vendor form.
+- Inert injection bait coverage.
+- Playwright E2E tests for the browser workflow and validation API.
+
+Not implemented yet:
+
 - Playwright execution and screenshot artifacts.
 - MCP endpoint and tool compiler.
 - Approval gate, validation run result, trace viewer, self-healing, and recorder.

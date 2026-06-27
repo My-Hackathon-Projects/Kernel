@@ -6,6 +6,6 @@
     "plugins": [{ "name": "next" }],
     "types": ["node", "react", "react-dom"]
   },
-  "include": ["app/**/*.ts", "app/**/*.tsx", "next.config.mjs"],
+  "include": ["app/**/*.ts", "app/**/*.tsx", "lib/**/*.ts", "next.config.mjs"],
   "exclude": ["node_modules"]
 }

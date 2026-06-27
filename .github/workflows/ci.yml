@@ -42,6 +42,12 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Install Playwright browsers
+        run: PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright pnpm exec playwright install --with-deps chromium
+
+      - name: End-to-end test
+        run: pnpm test:e2e
+
       - name: Validate Prisma schema
         run: pnpm db:validate
 

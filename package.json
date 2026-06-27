@@ -9,17 +9,20 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "check": "pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm db:validate && pnpm build",
+    "check": "pnpm format && pnpm lint && pnpm typecheck && pnpm test && pnpm test:e2e && pnpm db:validate && pnpm build",
     "db:generate": "DATABASE_URL=file:./dev.db prisma generate --schema prisma/schema.prisma",
     "db:validate": "DATABASE_URL=file:./dev.db prisma validate --schema prisma/schema.prisma",
     "dev": "turbo run dev",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "eslint . --max-warnings=0",
+    "playwright:install": "PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright playwright install chromium",
     "test": "turbo run test",
+    "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=.cache/ms-playwright playwright test",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "@playwright/test": "1.61.1",
     "@types/node": "26.0.1",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",

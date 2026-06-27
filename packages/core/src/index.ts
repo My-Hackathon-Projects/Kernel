@@ -1,11 +1,28 @@
 export {
+  apiError,
+  formatZodError,
+  validationError,
+  type ApiErrorBody,
+  type ApiErrorDetail
+} from "./api-error";
+
+export {
+  createVendorInputSchema,
+  vendorRecordSchema,
+  vendorRiskLevels,
+  vendorStatuses,
+  type CreateVendorInput,
+  type VendorRecord,
+  type VendorRiskLevel,
+  type VendorStatus
+} from "./vendor";
+
+export {
   createVendorWorkflowFixture,
   executeRequestSchema,
-  formatZodError,
   parseExecuteRequest,
   parseWorkflowInput,
   workflowDefinitionSchema,
-  type ApiErrorBody,
   type ExecuteRequest,
   type ParsedExecuteRequest,
   type WorkflowDefinition,
