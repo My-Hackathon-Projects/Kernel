@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.pnpm-store/
+.yarn/cache
+.yarn/unplugged
+
+# Build output
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Environment files (keep the example, ignore real values)
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing and coverage
+coverage/
+.nyc_output/
+playwright-report/
+playwright/.cache/
+test-results/
+
+# Caches
+.cache/
+.eslintcache
+.parcel-cache/
+
+# Local databases and artifacts (dev SQLite, run screenshots, traces)
+*.sqlite
+*.sqlite3
+*.db
+dev.db
+/artifacts/
+/storage/
+
+# Prisma local generated client (committed via schema, not the generated output)
+**/generated/prisma/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor and IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code (local, not shared)
+CLAUDE.md
+.claude/
