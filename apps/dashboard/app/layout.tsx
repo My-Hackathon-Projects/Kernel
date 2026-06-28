@@ -1,23 +1,31 @@
 import "./globals.css";
 import type { ReactNode } from "react";
-import { SiteFooter } from "../components/site-footer";
-import { SiteHeader } from "../components/site-header";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import { ProductShell } from "../components/product-shell";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans-var",
+  weight: ["400", "500", "600", "700", "800", "900"]
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-var",
+  weight: ["400", "500", "700"]
+});
 
 export const metadata = {
-  title: "Kernel — Agent-ready workflows",
+  title: "Kernel — Turn messy business data into validated, automated actions",
   description:
-    "Kernel turns a recorded web workflow into a typed, audited tool that agents call safely."
+    "Kernel observes your repetitive data workflows, validates the data, and builds a skill your AI agent can run. You approve every output."
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
       <body>
-        <div className="app-frame">
-          <SiteHeader />
-          <div className="app-main">{children}</div>
-          <SiteFooter />
-        </div>
+        <ProductShell>{children}</ProductShell>
       </body>
     </html>
   );

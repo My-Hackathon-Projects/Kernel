@@ -29,6 +29,13 @@ export {
 } from "./vendor-intake";
 
 export {
+  extractDischargeInput,
+  type DischargeIntakeFailure,
+  type DischargeIntakeResult,
+  type DischargeIntakeSuccess
+} from "./discharge-intake";
+
+export {
   parseDelimitedLine,
   parseDelimitedRows,
   type DelimitedDocument

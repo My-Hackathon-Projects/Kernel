@@ -796,6 +796,35 @@ export function DemoExperience(props: DemoExperienceProps) {
     }
   }, [props.sampleCsvPath, loadCsv]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (
+      !params.has("patient_id") &&
+      !params.has("diagnosis_code") &&
+      !params.has("attending_physician") &&
+      !params.has("discharge_date") &&
+      !params.has("readmission_risk")
+    ) {
+      return;
+    }
+
+    const raw: Record<string, string> = {
+      "Patient Name": params.get("patient_name") ?? "Imported patient",
+      MRN: params.get("patient_id") ?? "",
+      "Diagnosis Code": params.get("diagnosis_code") ?? "",
+      "Attending Physician": params.get("attending_physician") ?? "",
+      "Discharge Date": params.get("discharge_date") ?? "",
+      "Readmission Risk": params.get("readmission_risk") ?? "",
+      "Follow-up": params.get("follow_up") ?? "none"
+    };
+    const headers = Object.keys(raw);
+
+    setStage("intake");
+    setCsvError(null);
+    setHeaders(headers);
+    setCandidates([buildCandidate(raw, inputs, mapHeadersToInputs(headers, inputs))]);
+  }, [inputs]);
+
   const onUpload = useCallback(
     async (file: File | undefined) => {
       if (!file) {

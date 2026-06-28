@@ -9,7 +9,7 @@ export default function ImprintPage() {
     <main>
       <div className="shell">
         <section className="panel run-summary">
-          <Link href="/" className="back-link">
+          <Link href="/app" className="back-link">
             Back to home
           </Link>
           <div>

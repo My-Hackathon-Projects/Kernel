@@ -2,12 +2,12 @@
 
 A Chrome MV3 demo extension that turns whatever is on the page in front of you
 into a prefilled Kernel run. It reads the selected text (or the visible page
-text), sends it to the local Kernel intake API, and opens the console with the
-workflow inputs already filled in, ready for you to review, run, and approve.
+text), sends it to the local Kernel intake API, and opens Kernel with workflow
+inputs already filled in, ready for you to review, run, and approve.
 
-This is the live path, not the simulated guided demo. It calls the same
-`/api/intake/vendor` endpoint the dashboard uses and opens the real
-`create_vendor` workflow in `/console`.
+Vendor text uses the live path: the extension opens the real `create_vendor`
+workflow in `/console`. Patient discharge text opens the guided healthcare demo
+with the extracted record preloaded for review.
 
 ## What it is for
 
@@ -38,22 +38,22 @@ The Kernel icon appears in the toolbar. Pin it for easy access.
 4. Click **Read current page** to pull the selected or visible text into the box
    (or paste text in manually).
 5. Click **Extract fields**. Kernel maps the text onto the workflow inputs and
-   shows what it found (Company, Country, Tax ID, Risk).
-6. Click **Open in Kernel**. A new tab opens `/console` with those fields
-   prefilled.
-7. In the console, run the workflow. Kernel pauses before the write so you can
-   approve or reject it, then validates and stores the evidence.
+   shows what it found.
+6. Click **Open in Kernel**. Vendor data opens `/console`; patient discharge
+   data opens `/demo` at the import step.
+7. Review the fields before running or approving anything.
 
 ## How it works
 
-- `content-script.js` runs on the page and, on request, returns the current
-  selection or visible text (capped at 50k characters). It only responds to the
-  extension's own `kernel_collect_text` message.
-- `popup.js` sends that text to `POST http://localhost:3000/api/intake/vendor`,
-  the same intake endpoint the dashboard source panel uses, and renders the
-  mapped fields.
-- **Open in Kernel** opens `/console?company_name=...&country=...` so the run
-  starts prefilled. Nothing is submitted until you approve it in the console.
+- `popup.js` injects a read-only collector into all available frames, so Gmail
+  message bodies and editor frames can be read when Chrome allows it.
+- `content-script.js` remains as a fallback and only responds to the extension's
+  own `kernel_collect_text` message.
+- `popup.js` sends text to `POST http://localhost:3000/api/intake/workflow`,
+  which chooses the vendor or discharge intake path and renders the mapped fields.
+- **Open in Kernel** opens `/console?company_name=...` for vendor data or
+  `/demo?patient_id=...` for discharge data. Nothing is submitted by the
+  extension.
 
 ## Scope and limits
 

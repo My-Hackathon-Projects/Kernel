@@ -96,6 +96,21 @@ button:disabled {
   margin: 0;
 }
 
+.result-heading,
+.result-warning {
+  margin: 0 0 8px;
+}
+
+.result-heading {
+  font-weight: 800;
+}
+
+.result-warning {
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .result dt {
   font-weight: 800;
 }

@@ -26,7 +26,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="site-header-inner">
         <Link
-          href="/"
+          href="/app"
           className="brand"
           aria-label="Kernel home"
           onClick={() => setOpen(false)}

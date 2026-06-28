@@ -132,7 +132,7 @@ export function WorkflowStudio() {
           <p>Content hash {createdTool.workflow.contentHash.slice(0, 12)}</p>
           <p>
             <Link href="/tools">View in tools registry</Link> ·{" "}
-            <Link href="/">Test invoke</Link>
+            <Link href="/console">Test invoke</Link>
           </p>
         </div>
       ) : null}

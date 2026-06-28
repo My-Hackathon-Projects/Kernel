@@ -306,7 +306,7 @@ function StageDone({ s }: { s: Scenario }) {
 export function KernelDemo() {
   const [scenarioKey, setScenarioKey] = useState<"healthcare" | "vendor">("healthcare");
   const [step, setStep] = useState(0);
-  const s = SCENARIOS[scenarioKey];
+  const s = SCENARIOS[scenarioKey] ?? (SCENARIOS.healthcare as Scenario);
 
   const StageViews = [
     () => <StageDetect s={s} />,
@@ -315,7 +315,7 @@ export function KernelDemo() {
     () => <StageReview s={s} />,
     () => <StageDone s={s} />,
   ];
-  const View = StageViews[step];
+  const View = StageViews[step] ?? (() => null);
 
   function switchScenario(key: "healthcare" | "vendor") {
     setScenarioKey(key);
@@ -371,7 +371,7 @@ export function KernelDemo() {
 
         {/* Right content */}
         <div className="demo-content-col">
-          <div className="demo-stage-chip">{STEPS[step].kicker.toUpperCase()}</div>
+          <div className="demo-stage-chip">{STEPS[step]?.kicker.toUpperCase()}</div>
           <View />
           <div className="demo-nav-row">
             <button
