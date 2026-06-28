@@ -287,10 +287,32 @@ function extractFromKeyValue(text: string): Partial<Record<VendorField, string>>
       continue;
     }
 
-    const field = fieldForLabel(line);
+    // No delimiter: the line is either a bare label (value on the next line)
+    // or a label followed by its value separated by whitespace, which is how
+    // PDF column/grid layouts emit "Company Name    Acme GmbH".
+    const tokens = line.split(/\s+/).filter(Boolean);
+    let labelField: VendorField | null = null;
+    let labelTokenCount = 0;
+    for (let count = 1; count <= tokens.length; count += 1) {
+      const candidate = fieldForLabel(tokens.slice(0, count).join(" "));
+      if (candidate) {
+        labelField = candidate;
+        labelTokenCount = count;
+      }
+    }
+
+    if (!labelField) {
+      continue;
+    }
+
+    if (labelTokenCount < tokens.length) {
+      assignField(extracted, labelField, tokens.slice(labelTokenCount).join(" "));
+      continue;
+    }
+
     const nextLine = lines[index + 1];
-    if (field && nextLine) {
-      assignField(extracted, field, nextLine);
+    if (nextLine) {
+      assignField(extracted, labelField, nextLine);
       index += 1;
     }
   }

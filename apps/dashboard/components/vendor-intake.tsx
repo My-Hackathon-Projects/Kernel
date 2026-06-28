@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { readSheet } from "read-excel-file/browser";
-import { isXlsxFile, spreadsheetRowsToSourceText } from "../lib/source-file";
+import { isPdfFile, isXlsxFile, spreadsheetRowsToSourceText } from "../lib/source-file";
 
 type VendorInput = {
   company_name: string;
@@ -46,7 +46,24 @@ function labelForField(field: keyof VendorInput): string {
     .join(" ");
 }
 
+async function readPdfText(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await fetch("/api/intake/pdf", { method: "POST", body: form });
+  const payload = (await response.json()) as { text?: string; error?: { message: string } };
+
+  if (!response.ok || payload.error) {
+    throw new Error(payload.error?.message ?? "Could not read the PDF.");
+  }
+
+  return payload.text ?? "";
+}
+
 async function readFileText(file: File): Promise<string> {
+  if (isPdfFile(file)) {
+    return readPdfText(file);
+  }
+
   if (isXlsxFile(file)) {
     return spreadsheetRowsToSourceText(await readSheet(file));
   }
@@ -103,12 +120,14 @@ export function VendorIntake({ onExtractedInput }: VendorIntakeProps) {
 
     try {
       setSourceText(await readFileText(file));
-    } catch {
+    } catch (caught) {
       setError({
         error: {
           code: "file_read_failed",
           message:
-            "Could not read the selected file. Use .xlsx, .csv, .json, .txt, or .tsv."
+            caught instanceof Error
+              ? caught.message
+              : "Could not read the selected file. Use .pdf, .xlsx, .csv, .json, .txt, or .tsv."
         }
       });
     }
@@ -139,7 +158,7 @@ export function VendorIntake({ onExtractedInput }: VendorIntakeProps) {
         <input
           ref={fileInputRef}
           type="file"
-          accept=".xlsx,.csv,.json,.txt,.tsv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/json,text/plain"
+          accept=".pdf,.xlsx,.csv,.json,.txt,.tsv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/json,text/plain"
           className="sr-only"
           onChange={(event) => void loadFile(event.target.files?.[0])}
         />

@@ -24,3 +24,7 @@ export function isXlsxFile(file: File): boolean {
     file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   );
 }
+
+export function isPdfFile(file: File): boolean {
+  return file.name.toLowerCase().endsWith(".pdf") || file.type === "application/pdf";
+}

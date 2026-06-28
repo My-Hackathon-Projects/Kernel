@@ -7,7 +7,7 @@
     "default_popup": "popup.html",
     "default_title": "AgentPort"
   },
-  "permissions": ["activeTab", "tabs"],
+  "permissions": ["activeTab", "tabs", "clipboardRead"],
   "host_permissions": ["http://localhost:3000/*"],
   "content_scripts": [
     {

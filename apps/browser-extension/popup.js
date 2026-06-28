@@ -52,6 +52,24 @@ async function activeTab() {
   return tab;
 }
 
+async function readClipboard() {
+  const button = document.querySelector("#readClipboard");
+  setBusy(button, true, "Reading");
+  clearError();
+
+  try {
+    const text = await navigator.clipboard.readText();
+    sourceText.value = (text ?? "").trim();
+    if (!sourceText.value) {
+      setError("Clipboard is empty. Copy the text (Ctrl+C) in the PDF or sheet, then try again.");
+    }
+  } catch {
+    setError("Could not read the clipboard. Copy the text again and retry.");
+  } finally {
+    setBusy(button, false);
+  }
+}
+
 async function readCurrentPage() {
   const button = document.querySelector("#readPage");
   setBusy(button, true, "Reading");
@@ -95,7 +113,9 @@ async function extractFields() {
     const payload = await response.json();
 
     if (!response.ok || payload.error) {
-      setError(payload.error?.message ?? "Could not extract vendor fields.");
+      const message = payload.error?.message ?? "Could not extract vendor fields.";
+      const detail = payload.error?.details?.[0]?.message;
+      setError(detail ? `${message}: ${detail}` : message);
       return;
     }
 
@@ -125,6 +145,9 @@ for (const button of document.querySelectorAll("button")) {
 document
   .querySelector("#readPage")
   .addEventListener("click", () => void readCurrentPage());
+document
+  .querySelector("#readClipboard")
+  .addEventListener("click", () => void readClipboard());
 document
   .querySelector("#extract")
   .addEventListener("click", () => void extractFields());
