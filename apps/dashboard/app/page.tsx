@@ -15,6 +15,9 @@ export default function HomePage() {
               <Link href="/console" className="btn btn-primary">
                 Open console
               </Link>
+              <Link href="/demo" className="btn btn-ghost">
+                Watch demo
+              </Link>
             </div>
           </div>
           <div className="hero-art">

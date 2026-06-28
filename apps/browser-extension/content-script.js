@@ -11,7 +11,7 @@ function pageText() {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type !== "agentport_collect_text") {
+  if (message?.type !== "kernel_collect_text") {
     return false;
   }
 

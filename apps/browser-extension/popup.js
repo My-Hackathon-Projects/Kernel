@@ -65,7 +65,7 @@ async function readCurrentPage() {
     }
 
     const response = await chrome.tabs.sendMessage(tab.id, {
-      type: "agentport_collect_text"
+      type: "kernel_collect_text"
     });
     sourceText.value = response?.text ?? "";
     if (!sourceText.value) {
@@ -103,13 +103,13 @@ async function extractFields() {
     showResult(extractedInput);
     openConsole.disabled = false;
   } catch {
-    setError("AgentPort is not reachable at http://localhost:3000.");
+    setError("Kernel is not reachable at http://localhost:3000.");
   } finally {
     setBusy(button, false);
   }
 }
 
-function openAgentPort() {
+function openKernel() {
   if (!extractedInput) {
     return;
   }
@@ -128,4 +128,4 @@ document
 document
   .querySelector("#extract")
   .addEventListener("click", () => void extractFields());
-openConsole.addEventListener("click", openAgentPort);
+openConsole.addEventListener("click", openKernel);

@@ -37,6 +37,7 @@ coverage/
 playwright-report/
 playwright/.cache/
 test-results/
+.playwright-mcp/
 
 # Caches
 .cache/
