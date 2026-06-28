@@ -1,6 +1,6 @@
 # Kernel
 
-Live self-contained demo: <https://kernel-dashboard-seven.vercel.app/demo>
+Live self-contained demo: <https://kernel-dashboard-seven.vercel.app/>
 
 Kernel is the production layer between agents and the business software they
 have to operate. It records a human web workflow once and turns it into a
