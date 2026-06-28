@@ -9,4 +9,7 @@ export {
 
 export { parseExecuteRequest, parseWorkflowInput } from "./parser";
 
-export { createDischargeWorkflowFixture, createVendorWorkflowFixture } from "./fixtures";
+export {
+  createDischargeWorkflowFixture,
+  createVendorWorkflowFixture
+} from "./fixtures";

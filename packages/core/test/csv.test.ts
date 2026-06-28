@@ -28,7 +28,7 @@ describe("parseDelimitedRows", () => {
 
   it("keeps quoted values that contain the delimiter intact", () => {
     const doc = parseDelimitedRows(
-      ['Name,Note', '"Doe, John","Admitted, then discharged"'].join("\n")
+      ["Name,Note", '"Doe, John","Admitted, then discharged"'].join("\n")
     );
 
     expect(doc.rows[0]).toEqual({

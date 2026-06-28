@@ -25,12 +25,7 @@ const STAGES: ReadonlyArray<{ key: Stage; label: string }> = [
 ];
 
 type RunPhase =
-  | "idle"
-  | "running"
-  | "awaiting_approval"
-  | "rejected"
-  | "validating"
-  | "succeeded";
+  "idle" | "running" | "awaiting_approval" | "rejected" | "validating" | "succeeded";
 
 type DemoDischarge = {
   id: string;
@@ -122,9 +117,21 @@ const SEED_DISCHARGES: DemoDischarge[] = [
 // resemble these gets mapped; unrecognized columns (free-text notes, etc.) are
 // kept for display but never become tool inputs.
 const INPUT_ALIASES: Record<string, string[]> = {
-  patient_id: ["patient id", "patientid", "mrn", "medical record number", "record number"],
+  patient_id: [
+    "patient id",
+    "patientid",
+    "mrn",
+    "medical record number",
+    "record number"
+  ],
   diagnosis_code: ["diagnosis code", "diagnosis", "icd", "icd10", "icd 10", "dx"],
-  attending_physician: ["attending physician", "attending", "physician", "doctor", "provider"],
+  attending_physician: [
+    "attending physician",
+    "attending",
+    "physician",
+    "doctor",
+    "provider"
+  ],
   discharge_date: ["discharge date", "discharge", "date"],
   readmission_risk: ["readmission risk", "readmission", "risk", "acuity", "risk level"]
 };
@@ -148,7 +155,10 @@ function workflowInputMeta(workflow: WorkflowDefinition): InputMeta[] {
 }
 
 /** Build a column-header -> input-name map from the uploaded headers. */
-function mapHeadersToInputs(headers: string[], inputs: InputMeta[]): Map<string, string> {
+function mapHeadersToInputs(
+  headers: string[],
+  inputs: InputMeta[]
+): Map<string, string> {
   const normalizedHeaders = headers.map((header) => ({
     header,
     normalized: normalizeHeader(header)
@@ -156,10 +166,13 @@ function mapHeadersToInputs(headers: string[], inputs: InputMeta[]): Map<string,
   const mapping = new Map<string, string>();
 
   for (const input of inputs) {
-    const candidates = [input.name.replace(/_/g, " "), ...(INPUT_ALIASES[input.name] ?? [])].map(
-      normalizeHeader
+    const candidates = [
+      input.name.replace(/_/g, " "),
+      ...(INPUT_ALIASES[input.name] ?? [])
+    ].map(normalizeHeader);
+    const match = normalizedHeaders.find((entry) =>
+      candidates.includes(entry.normalized)
     );
-    const match = normalizedHeaders.find((entry) => candidates.includes(entry.normalized));
     if (match) {
       mapping.set(input.name, match.header);
     }
@@ -219,7 +232,8 @@ function buildCandidate(
     values,
     missing,
     invalid,
-    confidence: inputs.length === 0 ? 0 : Math.round((matched / inputs.length) * 100) / 100,
+    confidence:
+      inputs.length === 0 ? 0 : Math.round((matched / inputs.length) * 100) / 100,
     ready: missing.length === 0 && invalid.length === 0,
     injection: injectionCell ?? null
   };
@@ -319,7 +333,10 @@ function candidateToDischarge(candidate: Candidate, index: number): DemoDischarg
     patient_name: raw["Patient Name"] ?? raw["Patient"] ?? "Unknown",
     patient_id: value("patient_id", ["MRN", "Patient ID"]),
     diagnosis_code: value("diagnosis_code", ["Diagnosis Code", "Diagnosis"]),
-    attending_physician: value("attending_physician", ["Attending Physician", "Physician"]),
+    attending_physician: value("attending_physician", [
+      "Attending Physician",
+      "Physician"
+    ]),
     discharge_date: value("discharge_date", ["Discharge Date"]),
     readmission_risk: value("readmission_risk", ["Readmission Risk"]),
     follow_up: raw["Follow-up"] ?? raw["Follow up"] ?? "none",
@@ -355,11 +372,17 @@ type EvidenceModalProps = {
   onClose: () => void;
 };
 
-function EvidenceModal({ discharge, workflow, mcpEndpoint, onClose }: EvidenceModalProps) {
+function EvidenceModal({
+  discharge,
+  workflow,
+  mcpEndpoint,
+  onClose
+}: EvidenceModalProps) {
   const values = dischargeToValues(discharge);
   const steps = buildRunSteps(workflow, values);
   const evidenceUrl = `${mcpEndpoint.replace(/\/mcp$/, "")}/runs/${discharge.id}`;
-  const validated = discharge.status === "Filed" || discharge.status === "Pending Review";
+  const validated =
+    discharge.status === "Filed" || discharge.status === "Pending Review";
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -410,7 +433,9 @@ function EvidenceModal({ discharge, workflow, mcpEndpoint, onClose }: EvidenceMo
           </div>
           <div>
             <span>Validation</span>
-            <span className="demo-status demo-status-ok">{validated ? "passed" : "n/a"}</span>
+            <span className="demo-status demo-status-ok">
+              {validated ? "passed" : "n/a"}
+            </span>
           </div>
         </div>
 
@@ -432,7 +457,9 @@ function EvidenceModal({ discharge, workflow, mcpEndpoint, onClose }: EvidenceMo
               <span className="evidence-trace-title">{step.title}</span>
               {step.action !== "goto" ? (
                 <>
-                  <span className={`trace-tier tier-${step.tier}`}>tier {step.tier}</span>
+                  <span className={`trace-tier tier-${step.tier}`}>
+                    tier {step.tier}
+                  </span>
                   <code>{step.selector}</code>
                 </>
               ) : null}
@@ -466,7 +493,12 @@ type DischargeTableProps = {
   onEvidence: (discharge: DemoDischarge) => void;
 };
 
-type SortKey = "patient_name" | "attending_physician" | "discharge_date" | "readmission_risk" | "status";
+type SortKey =
+  | "patient_name"
+  | "attending_physician"
+  | "discharge_date"
+  | "readmission_risk"
+  | "status";
 
 const RISK_ORDER: Record<string, number> = { low: 1, medium: 2, high: 3 };
 
@@ -496,7 +528,8 @@ function DischargeTable({
         .toLowerCase();
       const matchesQuery = needle === "" || haystack.includes(needle);
       const matchesStatus = statusFilter === "all" || discharge.status === statusFilter;
-      const matchesRisk = riskFilter === "all" || discharge.readmission_risk === riskFilter;
+      const matchesRisk =
+        riskFilter === "all" || discharge.readmission_risk === riskFilter;
       return matchesQuery && matchesStatus && matchesRisk;
     });
 
@@ -575,7 +608,11 @@ function DischargeTable({
           <thead>
             <tr>
               <th>
-                <button type="button" className="th-sort" onClick={() => toggleSort("patient_name")}>
+                <button
+                  type="button"
+                  className="th-sort"
+                  onClick={() => toggleSort("patient_name")}
+                >
                   Patient{sortMark("patient_name")}
                 </button>
               </th>
@@ -610,7 +647,11 @@ function DischargeTable({
               </th>
               <th>Follow-up</th>
               <th>
-                <button type="button" className="th-sort" onClick={() => toggleSort("status")}>
+                <button
+                  type="button"
+                  className="th-sort"
+                  onClick={() => toggleSort("status")}
+                >
                   Status{sortMark("status")}
                 </button>
               </th>
@@ -626,7 +667,10 @@ function DischargeTable({
               </tr>
             ) : (
               visible.map((discharge) => (
-                <tr key={discharge.id} className={discharge.isNew ? "vendor-row-new" : undefined}>
+                <tr
+                  key={discharge.id}
+                  className={discharge.isNew ? "vendor-row-new" : undefined}
+                >
                   <td data-label="Patient">
                     {discharge.patient_name}
                     {discharge.isNew ? (
@@ -723,10 +767,15 @@ export function DemoExperience(props: DemoExperienceProps) {
   const [phase, setPhase] = useState<RunPhase>("idle");
   const [doneCount, setDoneCount] = useState(0);
   const [discharges, setDischarges] = useState<DemoDischarge[]>(SEED_DISCHARGES);
-  const [evidenceDischarge, setEvidenceDischarge] = useState<DemoDischarge | null>(null);
+  const [evidenceDischarge, setEvidenceDischarge] = useState<DemoDischarge | null>(
+    null
+  );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const ready = useMemo(() => candidates.filter((candidate) => candidate.ready), [candidates]);
+  const ready = useMemo(
+    () => candidates.filter((candidate) => candidate.ready),
+    [candidates]
+  );
   const headline = ready[0] ?? null;
   const onboarded = useMemo(
     () => ready.map((candidate, index) => candidateToDischarge(candidate, index)),
@@ -774,7 +823,9 @@ export function DemoExperience(props: DemoExperienceProps) {
     (text: string) => {
       const doc = parseDelimitedRows(text);
       if (doc.rows.length === 0) {
-        setCsvError("Could not read any records. Provide a CSV with a header and rows.");
+        setCsvError(
+          "Could not read any records. Provide a CSV with a header and rows."
+        );
         setCandidates([]);
         setHeaders([]);
         return;
@@ -869,7 +920,9 @@ export function DemoExperience(props: DemoExperienceProps) {
   function approveDischarge(id: string) {
     setDischarges((prev) =>
       prev.map((discharge) =>
-        discharge.id === id ? { ...discharge, status: "Filed", isNew: false } : discharge
+        discharge.id === id
+          ? { ...discharge, status: "Filed", isNew: false }
+          : discharge
       )
     );
   }
@@ -903,7 +956,9 @@ export function DemoExperience(props: DemoExperienceProps) {
               index < currentStageIndex ? "done" : ""
             }`}
           >
-            <span className="demo-step-num">{index < currentStageIndex ? "✓" : index + 1}</span>
+            <span className="demo-step-num">
+              {index < currentStageIndex ? "✓" : index + 1}
+            </span>
             {entry.label}
           </li>
         ))}
@@ -948,9 +1003,10 @@ export function DemoExperience(props: DemoExperienceProps) {
             <span>data diagnostics</span>
           </div>
           <p className="muted">
-            Export discharges from your EHR — Epic, Cerner, a spreadsheet, anything — and
-            drop the file in. Kernel reads any layout, maps the columns it recognizes onto
-            the tool inputs, and tells you which records are ready before anything runs.
+            Export discharges from your EHR — Epic, Cerner, a spreadsheet, anything —
+            and drop the file in. Kernel reads any layout, maps the columns it
+            recognizes onto the tool inputs, and tells you which records are ready
+            before anything runs.
           </p>
           <div className="demo-actions">
             <button type="button" onClick={() => void loadSample()}>
@@ -1015,7 +1071,9 @@ export function DemoExperience(props: DemoExperienceProps) {
                     {candidates.map((candidate, index) => (
                       <tr key={`${candidate.raw["MRN"] ?? "row"}-${index}`}>
                         <td data-label="Patient">
-                          {candidate.raw["Patient Name"] ?? candidate.raw["Patient"] ?? "—"}
+                          {candidate.raw["Patient Name"] ??
+                            candidate.raw["Patient"] ??
+                            "—"}
                         </td>
                         <td className="mono" data-label="MRN">
                           {candidate.raw["MRN"] || "—"}
@@ -1024,13 +1082,17 @@ export function DemoExperience(props: DemoExperienceProps) {
                           {candidate.values["diagnosis_code"] || "—"}
                         </td>
                         <td data-label="Risk">
-                          <RiskPill level={candidate.values["readmission_risk"] ?? ""} />
+                          <RiskPill
+                            level={candidate.values["readmission_risk"] ?? ""}
+                          />
                         </td>
                         <td className="num" data-label="Confidence">
                           <span className="confidence-bar">
                             <span
                               className="confidence-fill"
-                              style={{ width: `${Math.round(candidate.confidence * 100)}%` }}
+                              style={{
+                                width: `${Math.round(candidate.confidence * 100)}%`
+                              }}
                             />
                           </span>
                           {Math.round(candidate.confidence * 100)}%
@@ -1040,7 +1102,9 @@ export function DemoExperience(props: DemoExperienceProps) {
                             <span className="demo-status demo-status-ok">ready</span>
                           ) : (
                             <span className="demo-status demo-status-error">
-                              {candidate.missing[0] ?? candidate.invalid[0] ?? "incomplete"}
+                              {candidate.missing[0] ??
+                                candidate.invalid[0] ??
+                                "incomplete"}
                             </span>
                           )}
                         </td>
@@ -1054,13 +1118,15 @@ export function DemoExperience(props: DemoExperienceProps) {
                 <div className="injection-note">
                   <span className="injection-icon">🛡</span>
                   <div>
-                    <strong>Embedded instruction detected in the source document.</strong>
+                    <strong>
+                      Embedded instruction detected in the source document.
+                    </strong>
                     <p>
                       A free-text column on “{headline.raw["Patient Name"]}” says “
                       {INJECTION_DEMAND}”. It is not a mapped tool input, so it never
                       reaches the workflow — the real readmission risk (
-                      {headline.values["readmission_risk"]}) is used and approval is still
-                      required.
+                      {headline.values["readmission_risk"]}) is used and approval is
+                      still required.
                     </p>
                   </div>
                 </div>
@@ -1068,7 +1134,11 @@ export function DemoExperience(props: DemoExperienceProps) {
 
               <div className="demo-actions">
                 <button type="button" disabled={!headline} onClick={startRun}>
-                  File “{ready[0] ? candidateToDischarge(ready[0], 0).patient_name : "patient"}” →
+                  File “
+                  {ready[0]
+                    ? candidateToDischarge(ready[0], 0).patient_name
+                    : "patient"}
+                  ” →
                 </button>
               </div>
             </>
@@ -1112,10 +1182,16 @@ export function DemoExperience(props: DemoExperienceProps) {
                       </div>
                       {step.action !== "goto" ? (
                         <div className="trace-meta">
-                          <span className={`trace-tier tier-${step.tier}`}>tier {step.tier}</span>
+                          <span className={`trace-tier tier-${step.tier}`}>
+                            tier {step.tier}
+                          </span>
                           <code>{step.selector}</code>
-                          <span className="trace-conf">{Math.round(step.confidence * 100)}%</span>
-                          {step.risk ? <span className="trace-write">write</span> : null}
+                          <span className="trace-conf">
+                            {Math.round(step.confidence * 100)}%
+                          </span>
+                          {step.risk ? (
+                            <span className="trace-write">write</span>
+                          ) : null}
                         </div>
                       ) : null}
                     </li>
@@ -1131,7 +1207,9 @@ export function DemoExperience(props: DemoExperienceProps) {
                   <span className="browser-dot" />
                   <span className="browser-dot" />
                   <span className="browser-dot" />
-                  <span className="browser-url">portal.mercy-general.internal{workflow.startUrl}</span>
+                  <span className="browser-url">
+                    portal.mercy-general.internal{workflow.startUrl}
+                  </span>
                 </div>
                 <div className="browser-body">
                   <h3 className="portal-form-title">New discharge</h3>
@@ -1143,13 +1221,17 @@ export function DemoExperience(props: DemoExperienceProps) {
                       return (
                         <label key={step.id} className="demo-field">
                           <span>{label}</span>
-                          <output className={value ? "filled" : ""}>{value ?? ""}</output>
+                          <output className={value ? "filled" : ""}>
+                            {value ?? ""}
+                          </output>
                         </label>
                       );
                     })}
                   </div>
                   <div className={`portal-submit ${submitted ? "submitted" : ""}`}>
-                    {submitted ? "✓ Filed — awaiting clinical sign-off" : "File Discharge"}
+                    {submitted
+                      ? "✓ Filed — awaiting clinical sign-off"
+                      : "File Discharge"}
                   </div>
                 </div>
               </div>
@@ -1160,12 +1242,16 @@ export function DemoExperience(props: DemoExperienceProps) {
             <article className="approval-card demo-approval">
               <div>
                 <h3>Approve the write before it happens</h3>
-                <p>The run is paused. Nothing has been written to the patient record yet.</p>
+                <p>
+                  The run is paused. Nothing has been written to the patient record yet.
+                </p>
               </div>
               <dl className="approval-meta">
                 <div>
                   <dt>Resolved element</dt>
-                  <dd className="mono">{runSteps[riskIndex]?.selector ?? "submit_discharge"}</dd>
+                  <dd className="mono">
+                    {runSteps[riskIndex]?.selector ?? "submit_discharge"}
+                  </dd>
                 </div>
                 <div>
                   <dt>Action</dt>
@@ -1183,8 +1269,9 @@ export function DemoExperience(props: DemoExperienceProps) {
               {headline.injection ? (
                 <p className="approval-trust">
                   🛡 Source document tried to force “{INJECTION_DEMAND}”. Ignored —
-                  readmission_risk stays <strong>{headline.values["readmission_risk"]}</strong>,
-                  and this gate still requires you.
+                  readmission_risk stays{" "}
+                  <strong>{headline.values["readmission_risk"]}</strong>, and this gate
+                  still requires you.
                 </p>
               ) : null}
               <div className="approval-actions">
@@ -1199,13 +1286,18 @@ export function DemoExperience(props: DemoExperienceProps) {
           ) : null}
 
           {phase === "validating" ? (
-            <p className="muted">Confirming the discharge through an independent API channel…</p>
+            <p className="muted">
+              Confirming the discharge through an independent API channel…
+            </p>
           ) : null}
 
           {phase === "rejected" ? (
             <div className="result error" role="status">
               <h3>Run rejected</h3>
-              <p>The write was declined, so nothing was filed. The audit log keeps the record.</p>
+              <p>
+                The write was declined, so nothing was filed. The audit log keeps the
+                record.
+              </p>
               <div className="demo-actions">
                 <button type="button" className="secondary" onClick={restart}>
                   Restart demo
@@ -1239,7 +1331,8 @@ export function DemoExperience(props: DemoExperienceProps) {
                   <li>
                     <span>Channel</span>
                     <code>
-                      GET {workflow.validation.endpoint}?{workflow.validation.queryField}=…
+                      GET {workflow.validation.endpoint}?
+                      {workflow.validation.queryField}=…
                     </code>
                   </li>
                   <li>
@@ -1253,8 +1346,8 @@ export function DemoExperience(props: DemoExperienceProps) {
                 </ul>
               ) : null}
               <p className="muted">
-                The side effect is confirmed by reading the portal&apos;s data API, not by
-                re-scraping the page the agent just acted on.
+                The side effect is confirmed by reading the portal&apos;s data API, not
+                by re-scraping the page the agent just acted on.
               </p>
             </div>
 
@@ -1267,7 +1360,9 @@ export function DemoExperience(props: DemoExperienceProps) {
                 </li>
                 <li>
                   <span>Screenshots</span>
-                  <strong>{runSteps.filter((step) => step.action !== "goto").length}</strong>
+                  <strong>
+                    {runSteps.filter((step) => step.action !== "goto").length}
+                  </strong>
                 </li>
                 <li>
                   <span>Human approvals</span>
@@ -1312,9 +1407,10 @@ export function DemoExperience(props: DemoExperienceProps) {
             <span>v{version}</span>
           </div>
           <p className="muted">
-            That recorded workflow is compiled into a typed tool any MCP client can call —
-            Claude, Cursor, or your own agent. Same deterministic execution, same approval
-            gate, same evidence. Point it at procurement, finance, or any portal next.
+            That recorded workflow is compiled into a typed tool any MCP client can call
+            — Claude, Cursor, or your own agent. Same deterministic execution, same
+            approval gate, same evidence. Point it at procurement, finance, or any
+            portal next.
           </p>
 
           <div className="result-grid">
@@ -1328,7 +1424,11 @@ export function DemoExperience(props: DemoExperienceProps) {
                       <tr key={name}>
                         <td className="mono">{name}</td>
                         <td>{enumValues ? enumValues.join(" | ") : property.type}</td>
-                        <td>{inputSchema.required.includes(name) ? "required" : "optional"}</td>
+                        <td>
+                          {inputSchema.required.includes(name)
+                            ? "required"
+                            : "optional"}
+                        </td>
                       </tr>
                     );
                   })}

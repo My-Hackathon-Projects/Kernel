@@ -152,12 +152,22 @@ function collectReadablePageText() {
         element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement
           ? element.value
           : "";
-      addCandidate(candidates, formValue || element.innerText || element.textContent, 100);
+      addCandidate(
+        candidates,
+        formValue || element.innerText || element.textContent,
+        100
+      );
     }
   }
 
-  addCandidate(candidates, document.body?.innerText ?? document.body?.textContent ?? "", 1);
-  candidates.sort((left, right) => right.score - left.score || right.text.length - left.text.length);
+  addCandidate(
+    candidates,
+    document.body?.innerText ?? document.body?.textContent ?? "",
+    1
+  );
+  candidates.sort(
+    (left, right) => right.score - left.score || right.text.length - left.text.length
+  );
 
   const seen = new Set();
   const parts = [];
@@ -295,7 +305,9 @@ function openKernel() {
     ...extractedResult.context
   });
   const destination =
-    extractedResult.workflow === "file_discharge" ? "/demo" : extractedResult.destination;
+    extractedResult.workflow === "file_discharge"
+      ? "/demo"
+      : extractedResult.destination;
   chrome.tabs.create({ url: `${dashboardUrl}${destination}?${params.toString()}` });
 }
 

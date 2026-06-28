@@ -29,20 +29,20 @@ const SCENARIOS: Record<string, Scenario> = {
     label: "Healthcare / EHR",
     tag: "🏥",
     history: [
-      { day: "Mon", portal: "Medscape EHR",   action: "Patient discharge summary" },
-      { day: "Wed", portal: "Epic Systems",    action: "Discharge documentation" },
-      { day: "Thu", portal: "Hospital Portal", action: "Post-care record filing" },
+      { day: "Mon", portal: "Medscape EHR", action: "Patient discharge summary" },
+      { day: "Wed", portal: "Epic Systems", action: "Discharge documentation" },
+      { day: "Thu", portal: "Hospital Portal", action: "Post-care record filing" }
     ],
     detectFinding:
       "Same patient discharge data entered across 3 different hospital systems. Kernel sees a pattern worth automating.",
     colonelDetect:
       "You've entered discharge summaries 47 times this month across 3 different systems. Let me handle this — you review before anything saves to the patient record.",
     fields: {
-      "Patient ID":          "CHN-2024-003847",
-      "Diagnosis Code":      "ICD-10: J18.9",
+      "Patient ID": "CHN-2024-003847",
+      "Diagnosis Code": "ICD-10: J18.9",
       "Attending Physician": "Dr. Sarah Miller",
-      "Discharge Date":      "2024-06-27",
-      "Follow-up Required":  "Yes — 2 weeks",
+      "Discharge Date": "2024-06-27",
+      "Follow-up Required": "Yes — 2 weeks"
     },
     skillName: "discharge_autofill",
     portals: ["Medscape EHR", "Epic Systems", "Hospital Portal"],
@@ -61,34 +61,34 @@ const SCENARIOS: Record<string, Scenario> = {
     doneStats: [
       { value: "~6 min", label: "saved" },
       { value: "5", label: "fields filled" },
-      { value: "1", label: "human approval" },
+      { value: "1", label: "human approval" }
     ],
     evidence: [
       "discharge_autofill run #48 — completed",
       "Screenshot captured at each step",
       "Human reviewed and approved all fields",
-      "Patient record validated post-submit",
-    ],
+      "Patient record validated post-submit"
+    ]
   },
 
   vendor: {
     label: "Enterprise / Procurement",
     tag: "🏢",
     history: [
-      { day: "Mon", portal: "SAP Ariba",         action: "New supplier registration" },
+      { day: "Mon", portal: "SAP Ariba", action: "New supplier registration" },
       { day: "Wed", portal: "ServiceNow Catalog", action: "Vendor onboarding request" },
-      { day: "Thu", portal: "Coupa Procurement",  action: "Add approved supplier" },
+      { day: "Thu", portal: "Coupa Procurement", action: "Add approved supplier" }
     ],
     detectFinding:
       "Same supplier details across 3 different portals. Kernel sees a pattern worth automating.",
     colonelDetect:
       "I noticed you keep entering the same supplier details across different portals. Let me remember them for you.",
     fields: {
-      "Supplier Name":    "Solarwind Materials GmbH",
-      "Country":          "Germany",
+      "Supplier Name": "Solarwind Materials GmbH",
+      Country: "Germany",
       "Business Address": "Kantstraße 14, 10623 Berlin",
-      "Contact Email":    "procurement@solarwind.de",
-      "VAT Number":       "DE381234567",
+      "Contact Email": "procurement@solarwind.de",
+      "VAT Number": "DE381234567"
     },
     skillName: "vendor_autofill",
     portals: ["SAP Ariba", "ServiceNow", "Coupa"],
@@ -107,23 +107,23 @@ const SCENARIOS: Record<string, Scenario> = {
     doneStats: [
       { value: "~4 min", label: "saved" },
       { value: "5", label: "fields filled" },
-      { value: "1", label: "human approval" },
+      { value: "1", label: "human approval" }
     ],
     evidence: [
       "vendor_autofill run #4 — completed",
       "Screenshot captured at each step",
       "Human reviewed and approved inputs",
-      "Post-submit validation passed",
-    ],
-  },
+      "Post-submit validation passed"
+    ]
+  }
 };
 
 const STEPS = [
-  { id: "detect", num: "01", title: "Pattern spotted",  kicker: "Kernel noticed" },
-  { id: "skill",  num: "02", title: "Skill built",       kicker: "No config needed" },
-  { id: "offer",  num: "03", title: "Colonel offers",    kicker: "Next portal visit" },
-  { id: "review", num: "04", title: "You review",        kicker: "Nothing yet submitted" },
-  { id: "done",   num: "05", title: "Done",               kicker: "Evidence saved" },
+  { id: "detect", num: "01", title: "Pattern spotted", kicker: "Kernel noticed" },
+  { id: "skill", num: "02", title: "Skill built", kicker: "No config needed" },
+  { id: "offer", num: "03", title: "Colonel offers", kicker: "Next portal visit" },
+  { id: "review", num: "04", title: "You review", kicker: "Nothing yet submitted" },
+  { id: "done", num: "05", title: "Done", kicker: "Evidence saved" }
 ];
 
 const NEXT_LABELS = [
@@ -131,7 +131,7 @@ const NEXT_LABELS = [
   "See it in action →",
   "Let Kernel fill it →",
   "Submit →",
-  "Start over",
+  "Start over"
 ];
 
 function ColonelTag({ text }: { text: string }) {
@@ -180,7 +180,9 @@ function StageSkill({ s }: { s: Scenario }) {
           </div>
           <span className="skill-active-dot">● Active</span>
         </div>
-        <p className="demo-sublabel" style={{ marginTop: 0 }}>What I&apos;ll fill in</p>
+        <p className="demo-sublabel" style={{ marginTop: 0 }}>
+          What I&apos;ll fill in
+        </p>
         <div className="skill-fields-table">
           {Object.entries(s.fields).map(([k, v]) => (
             <div key={k} className="skill-field-row">
@@ -190,9 +192,13 @@ function StageSkill({ s }: { s: Scenario }) {
           ))}
         </div>
         <div className="skill-portals-row">
-          <span className="demo-sublabel" style={{ marginTop: 0 }}>Works on:</span>
+          <span className="demo-sublabel" style={{ marginTop: 0 }}>
+            Works on:
+          </span>
           {s.portals.map((p) => (
-            <span key={p} className="skill-portal-pill">{p}</span>
+            <span key={p} className="skill-portal-pill">
+              {p}
+            </span>
           ))}
         </div>
       </div>
@@ -313,7 +319,7 @@ export function KernelDemo() {
     () => <StageSkill s={s} />,
     () => <StageOffer s={s} />,
     () => <StageReview s={s} />,
-    () => <StageDone s={s} />,
+    () => <StageDone s={s} />
   ];
   const View = StageViews[step] ?? (() => null);
 
@@ -344,7 +350,7 @@ export function KernelDemo() {
         {/* Left stepper rail */}
         <ol className="demo-rail">
           {STEPS.map((st, i) => {
-            const done   = i < step;
+            const done = i < step;
             const active = i === step;
             return (
               <li key={st.id} className="demo-rail-item">
@@ -356,7 +362,9 @@ export function KernelDemo() {
                   className={`demo-rail-btn ${active ? "active" : ""} ${done ? "done" : ""}`}
                   onClick={() => setStep(i)}
                 >
-                  <span className={`demo-rail-num ${active ? "active" : ""} ${done ? "done" : ""}`}>
+                  <span
+                    className={`demo-rail-num ${active ? "active" : ""} ${done ? "done" : ""}`}
+                  >
                     {done ? "✓" : st.num}
                   </span>
                   <span className="demo-rail-label">
@@ -388,7 +396,9 @@ export function KernelDemo() {
             </div>
             <button
               className="demo-nav-next"
-              onClick={() => setStep(step === STEPS.length - 1 ? 0 : (prev) => prev + 1)}
+              onClick={() =>
+                setStep(step === STEPS.length - 1 ? 0 : (prev) => prev + 1)
+              }
             >
               {NEXT_LABELS[step]}
             </button>

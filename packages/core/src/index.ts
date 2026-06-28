@@ -35,11 +35,7 @@ export {
   type DischargeIntakeSuccess
 } from "./discharge-intake";
 
-export {
-  parseDelimitedLine,
-  parseDelimitedRows,
-  type DelimitedDocument
-} from "./csv";
+export { parseDelimitedLine, parseDelimitedRows, type DelimitedDocument } from "./csv";
 
 export {
   createDischargeWorkflowFixture,

@@ -41,10 +41,26 @@ const useCases = [
 ];
 
 const whatKernelHandles = [
-  { icon: "🌐", title: "Web portals & forms",     desc: "Any browser-based data entry — EHR systems, procurement portals, CRMs, banking interfaces" },
-  { icon: "📊", title: "Spreadsheets & Excel",     desc: "Formula application, data mapping, row transforms — recurring operations on new files" },
-  { icon: "📄", title: "PDFs, CSVs & documents",  desc: "Feed Kernel your data files for context — it reads structure and maps values intelligently" },
-  { icon: "📷", title: "Physical docs & photos",   desc: "Upload a photo of a printed form or handwritten record — Kernel extracts and maps the fields" }
+  {
+    icon: "🌐",
+    title: "Web portals & forms",
+    desc: "Any browser-based data entry — EHR systems, procurement portals, CRMs, banking interfaces"
+  },
+  {
+    icon: "📊",
+    title: "Spreadsheets & Excel",
+    desc: "Formula application, data mapping, row transforms — recurring operations on new files"
+  },
+  {
+    icon: "📄",
+    title: "PDFs, CSVs & documents",
+    desc: "Feed Kernel your data files for context — it reads structure and maps values intelligently"
+  },
+  {
+    icon: "📷",
+    title: "Physical docs & photos",
+    desc: "Upload a photo of a printed form or handwritten record — Kernel extracts and maps the fields"
+  }
 ];
 
 const capabilities = [
@@ -63,27 +79,43 @@ const capabilities = [
 ];
 
 const team = [
-  { name: "Sparsh Tyagi",                     bio: "BCG Applied AI, MMT at TUM, ex-Allianz, ex-Celonis, past 6 figure raising founder",   photo: "/Team/Sparsh.jpg" },
-  { name: "Alicia Tyagi",                     bio: "CS & Business at Lehigh, DAAD RISE research intern at LMU Munich",           photo: "/Team/14.jpg" },
-  { name: "Gauthier Asselin de Williencourt", bio: "Franco-American filmmaker, co-founder of HyperIA, serial builder at SNCF",   photo: "/Team/15.jpg" },
-  { name: "Rishabh Tiwari",                   bio: "Full-stack engineer at SAP, ex-Porsche ML thesis, ex-Amazon, applied AI Engineer",   photo: "/Team/16.jpg" }
+  {
+    name: "Sparsh Tyagi",
+    bio: "BCG Applied AI, MMT at TUM, ex-Allianz, ex-Celonis, past 6 figure raising founder",
+    photo: "/Team/Sparsh.jpg"
+  },
+  {
+    name: "Alicia Tyagi",
+    bio: "CS & Business at Lehigh, DAAD RISE research intern at LMU Munich",
+    photo: "/Team/14.jpg"
+  },
+  {
+    name: "Gauthier Asselin de Williencourt",
+    bio: "Franco-American filmmaker, co-founder of HyperIA, serial builder at SNCF",
+    photo: "/Team/15.jpg"
+  },
+  {
+    name: "Rishabh Tiwari",
+    bio: "Full-stack engineer at SAP, ex-Porsche ML thesis, ex-Amazon, applied AI Engineer",
+    photo: "/Team/16.jpg"
+  }
 ];
 
 const logoRail = [
-  { alt: "BCG",        src: "/logos/BCG.png" },
-  { alt: "Amazon",     src: "/logos/Amazon.png" },
-  { alt: "TUM",        src: "/logos/TUM.png" },
-  { alt: "Lehigh",     src: "/logos/Lehigh.jpeg" },
+  { alt: "BCG", src: "/logos/BCG.png" },
+  { alt: "Amazon", src: "/logos/Amazon.png" },
+  { alt: "TUM", src: "/logos/TUM.png" },
+  { alt: "Lehigh", src: "/logos/Lehigh.jpeg" },
   { alt: "LMU Munich", src: "/logos/LMU.png" },
-  { alt: "SAP",        src: "/logos/SAP.jpg" },
-  { alt: "Porsche",    src: "/logos/Porsche.png" },
-  { alt: "SNCF",       src: "/logos/SNCF.png" },
-  { alt: "NUS",        src: "/logos/NUS.png" },
-  { alt: "Celonis",    src: "/logos/Celonis.png" },
-  { alt: "Allianz",    src: "/logos/Allianz.png" },
-  { alt: "EY",         src: "/logos/EY_logo_2019.svg.png" },
-  { alt: "Deloitte",   src: "/logos/Deloitte-Logo.png" },
-  { alt: "Heidelberg", src: "/logos/Hidelberg.jpg" },
+  { alt: "SAP", src: "/logos/SAP.jpg" },
+  { alt: "Porsche", src: "/logos/Porsche.png" },
+  { alt: "SNCF", src: "/logos/SNCF.png" },
+  { alt: "NUS", src: "/logos/NUS.png" },
+  { alt: "Celonis", src: "/logos/Celonis.png" },
+  { alt: "Allianz", src: "/logos/Allianz.png" },
+  { alt: "EY", src: "/logos/EY_logo_2019.svg.png" },
+  { alt: "Deloitte", src: "/logos/Deloitte-Logo.png" },
+  { alt: "Heidelberg", src: "/logos/Hidelberg.jpg" }
 ];
 
 const whatWeBuilt = [
@@ -114,16 +146,15 @@ const whatWeBuilt = [
 ];
 
 const analyticsStats = [
-  { value: "4.2 hrs",  label: "saved per user per week (avg)" },
-  { value: "94%",      label: "of steps automated after skill creation" },
-  { value: "~0",       label: "submission errors in human-reviewed flows" }
+  { value: "4.2 hrs", label: "saved per user per week (avg)" },
+  { value: "94%", label: "of steps automated after skill creation" },
+  { value: "~0", label: "submission errors in human-reviewed flows" }
 ];
 
 export default function Page() {
   return (
     <main>
       <div className="landing-shell">
-
         {/* ── Hero ── */}
         <section className="hero" id="top">
           <div className="hero-inner">
@@ -144,7 +175,9 @@ export default function Page() {
 
             <div className="hero-grid">
               <div className="hero-copy">
-                <p className="eyebrow">Browser extension · Works with Claude Code, Codex & Cursor</p>
+                <p className="eyebrow">
+                  Browser extension · Works with Claude Code, Codex & Cursor
+                </p>
                 <h1>Turn messy business data into validated, automated actions.</h1>
                 <p className="hero-lede">
                   Kernel observes your repetitive data workflows — forms, spreadsheets,
@@ -153,8 +186,12 @@ export default function Page() {
                   every field before anything is committed.
                 </p>
                 <div className="hero-actions">
-                  <Link className="primary-action" href="/app">Run the demo</Link>
-                  <a className="secondary-action" href="#how-it-works">How it works</a>
+                  <Link className="primary-action" href="/app">
+                    Run the demo
+                  </Link>
+                  <a className="secondary-action" href="#how-it-works">
+                    How it works
+                  </a>
                 </div>
                 <div className="proof-strip">
                   <div>
@@ -174,7 +211,9 @@ export default function Page() {
 
               <div className="hero-product">
                 <div className="browser-bar">
-                  <span /><span /><span />
+                  <span />
+                  <span />
+                  <span />
                   <p>ehr.hospital.internal / patients / records / new</p>
                   <span className="browser-kernel-icon">🫡</span>
                 </div>
@@ -185,7 +224,13 @@ export default function Page() {
                       <h3 className="portal-form-heading">Patient Discharge Summary</h3>
                     </div>
                     <div className="portal-blank-fields">
-                      {["Patient ID", "Diagnosis Code", "Attending Physician", "Discharge Date", "Follow-up Required"].map((f) => (
+                      {[
+                        "Patient ID",
+                        "Diagnosis Code",
+                        "Attending Physician",
+                        "Discharge Date",
+                        "Follow-up Required"
+                      ].map((f) => (
                         <div key={f} className="portal-blank-row">
                           <span className="portal-blank-label">{f}</span>
                           <div className="portal-blank-inp" />
@@ -200,7 +245,10 @@ export default function Page() {
                         <span className="hero-colonel-name">Colonel Kernel</span>
                         <span className="hero-colonel-stars">★★★</span>
                       </div>
-                      <p>I know this form. You&apos;ve filled it 47 times this month. Let me handle it — you review before it saves.</p>
+                      <p>
+                        I know this form. You&apos;ve filled it 47 times this month. Let
+                        me handle it — you review before it saves.
+                      </p>
                       <div className="hero-colonel-btns">
                         <span className="hero-colonel-yes">Yes, fill it</span>
                         <span className="hero-colonel-no">Not now</span>
@@ -222,9 +270,10 @@ export default function Page() {
           <p>
             Every business has structured work that lives outside APIs — nurses entering
             patient records, analysts logging compliance data, ops teams navigating
-            procurement portals. The data is messy, the stakes are high, and there&apos;s no
-            layer that validates what goes in before the action fires. Kernel is that layer:
-            it observes, validates, and automates — with a human approving every output.
+            procurement portals. The data is messy, the stakes are high, and
+            there&apos;s no layer that validates what goes in before the action fires.
+            Kernel is that layer: it observes, validates, and automates — with a human
+            approving every output.
           </p>
         </section>
 
@@ -276,14 +325,25 @@ export default function Page() {
             <div className="privacy-body">
               <h2>Your data never leaves your tab.</h2>
               <p>
-                Kernel runs at the agent layer, not the browser level. It sees nothing beyond
-                the specific tab you authorize for a session — no browser history, no other
-                open tabs, no PII it wasn&apos;t explicitly shown.
+                Kernel runs at the agent layer, not the browser level. It sees nothing
+                beyond the specific tab you authorize for a session — no browser
+                history, no other open tabs, no PII it wasn&apos;t explicitly shown.
               </p>
               <div className="privacy-points">
-                <div className="privacy-point"><span>✓</span><p>Enable per-session, per-tab — you control exactly what Kernel sees</p></div>
-                <div className="privacy-point"><span>✓</span><p>No browser-level access, no background data collection</p></div>
-                <div className="privacy-point"><span>✓</span><p>Nothing submitted or saved without explicit human approval</p></div>
+                <div className="privacy-point">
+                  <span>✓</span>
+                  <p>
+                    Enable per-session, per-tab — you control exactly what Kernel sees
+                  </p>
+                </div>
+                <div className="privacy-point">
+                  <span>✓</span>
+                  <p>No browser-level access, no background data collection</p>
+                </div>
+                <div className="privacy-point">
+                  <span>✓</span>
+                  <p>Nothing submitted or saved without explicit human approval</p>
+                </div>
               </div>
             </div>
           </div>
@@ -322,7 +382,9 @@ export default function Page() {
         <section className="analytics-band">
           <div className="analytics-inner">
             <div className="analytics-label">
-              <p className="eyebrow" style={{ color: "var(--c-brand)" }}>Early results</p>
+              <p className="eyebrow" style={{ color: "var(--c-brand)" }}>
+                Early results
+              </p>
               <h3>Time saved is measurable from day one.</h3>
             </div>
             <div className="analytics-stats">
@@ -340,7 +402,9 @@ export default function Page() {
         <section className="demo-band" id="demo">
           <div className="section-intro">
             <p className="eyebrow">Guided demo</p>
-            <h2>Walk through the full loop — from pattern detection to submitted record.</h2>
+            <h2>
+              Walk through the full loop — from pattern detection to submitted record.
+            </h2>
             <p>
               Click through five stages: Kernel notices a pattern, builds a skill,
               offers to help, shows you the pre-filled form, and logs the completed run.
@@ -355,8 +419,9 @@ export default function Page() {
             <p className="eyebrow">What we built</p>
             <h2>Four layers. One seamless loop.</h2>
             <p>
-              Kernel isn&apos;t a single tool — it&apos;s a stack. Each layer handles one job,
-              and they chain together so the human only touches the part that matters: the final approval.
+              Kernel isn&apos;t a single tool — it&apos;s a stack. Each layer handles
+              one job, and they chain together so the human only touches the part that
+              matters: the final approval.
             </p>
           </div>
           <div className="built-grid">
@@ -380,9 +445,9 @@ export default function Page() {
             <div>
               <h3>Kernel also proactively suggests automations.</h3>
               <p>
-                You don&apos;t have to enable Kernel and wait. As it observes your sessions,
-                it surfaces suggestions: &ldquo;I noticed you&apos;ve done this 5 times this week.
-                Want me to build a skill for it?&rdquo;
+                You don&apos;t have to enable Kernel and wait. As it observes your
+                sessions, it surfaces suggestions: &ldquo;I noticed you&apos;ve done
+                this 5 times this week. Want me to build a skill for it?&rdquo;
               </p>
             </div>
           </div>
@@ -394,8 +459,9 @@ export default function Page() {
             <p className="eyebrow">The team</p>
             <h2>Built by people who believe automation should never skip the human.</h2>
             <p>
-              BCG strategy, SAP engineering, HyperIA creative production, and LMU HCI research
-              — united by a shared obsession for keeping humans in control of autonomous systems.
+              BCG strategy, SAP engineering, HyperIA creative production, and LMU HCI
+              research — united by a shared obsession for keeping humans in control of
+              autonomous systems.
             </p>
           </div>
 
@@ -423,10 +489,14 @@ export default function Page() {
         {/* ── CTA ── */}
         <section className="cta-band">
           <h2>Stop doing your data work twice.</h2>
-          <p>Kernel works with Claude Code, Codex, Cursor, and any MCP-compatible agent. Tab-isolated. Human-approved.</p>
-          <Link className="primary-action" href="/app">Run the demo</Link>
+          <p>
+            Kernel works with Claude Code, Codex, Cursor, and any MCP-compatible agent.
+            Tab-isolated. Human-approved.
+          </p>
+          <Link className="primary-action" href="/app">
+            Run the demo
+          </Link>
         </section>
-
       </div>
     </main>
   );

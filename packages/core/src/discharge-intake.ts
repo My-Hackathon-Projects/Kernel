@@ -37,10 +37,36 @@ export type DischargeIntakeResult = DischargeIntakeSuccess | DischargeIntakeFail
 
 const FIELD_ALIASES: Record<DischargeField | ExtraField, string[]> = {
   patient_name: ["patient name", "patient", "name"],
-  patient_id: ["patient id", "patientid", "mrn", "medical record number", "record number"],
-  diagnosis_code: ["diagnosis code", "diagnosis", "icd", "icd10", "icd 10", "dx", "code"],
-  attending_physician: ["attending physician", "attending", "physician", "doctor", "provider"],
-  discharge_date: ["discharge date", "discharge", "discharged", "left hospital", "date"],
+  patient_id: [
+    "patient id",
+    "patientid",
+    "mrn",
+    "medical record number",
+    "record number"
+  ],
+  diagnosis_code: [
+    "diagnosis code",
+    "diagnosis",
+    "icd",
+    "icd10",
+    "icd 10",
+    "dx",
+    "code"
+  ],
+  attending_physician: [
+    "attending physician",
+    "attending",
+    "physician",
+    "doctor",
+    "provider"
+  ],
+  discharge_date: [
+    "discharge date",
+    "discharge",
+    "discharged",
+    "left hospital",
+    "date"
+  ],
   readmission_risk: ["readmission risk", "risk", "risk level", "acuity"],
   follow_up: ["follow up", "follow-up", "fu", "followup"]
 };
@@ -51,7 +77,10 @@ function normalizeLabel(value: string): string {
 
 const ALIAS_TO_FIELD = new Map<string, DischargeField | ExtraField>(
   Object.entries(FIELD_ALIASES).flatMap(([field, aliases]) =>
-    aliases.map((alias) => [normalizeLabel(alias), field as DischargeField | ExtraField])
+    aliases.map((alias) => [
+      normalizeLabel(alias),
+      field as DischargeField | ExtraField
+    ])
   )
 );
 
@@ -224,7 +253,11 @@ function extractFromFreeText(text: string) {
     firstMatch(
       text,
       /\b(?:dx|diagnosis(?: code)?|icd(?:-?10)?|code|paperwork)\s*(?:is|was|=|:|says)?\s*([A-Z]\d{1,2}(?:\.\d+)?)\b/i
-    ) ?? firstMatch(text, /\b(?:code|paperwork)\b[^\n.]{0,100}\b([A-Z]\d{1,2}(?:\.\d+)?)\b/i);
+    ) ??
+    firstMatch(
+      text,
+      /\b(?:code|paperwork)\b[^\n.]{0,100}\b([A-Z]\d{1,2}(?:\.\d+)?)\b/i
+    );
   if (diagnosis) {
     input.diagnosis_code = diagnosis.toUpperCase();
   }
@@ -246,14 +279,23 @@ function extractFromFreeText(text: string) {
     input.discharge_date = normalizeDate(date);
   }
 
-  const risk = firstMatch(text, /\b(?:readmission\s+)?risk\s*(?:is|=|:)?\s*(low|medium|high)\b/i);
+  const risk = firstMatch(
+    text,
+    /\b(?:readmission\s+)?risk\s*(?:is|=|:)?\s*(low|medium|high)\b/i
+  );
   if (risk) {
     input.readmission_risk = risk.toLowerCase();
   }
 
   const followUp =
-    firstMatch(text, /\b(?:check back(?: with you)?|follow[- ]?up|FU)\s+(?:in\s+)?(about\s+\d+\s+\w+|\d+\s+\w+)\b/i) ??
-    firstMatch(text, /\b(?:follow[- ]?up|FU)\s*(?:is|=|:|in)?\s*(none|no follow[- ]?up|as needed)\b/i);
+    firstMatch(
+      text,
+      /\b(?:check back(?: with you)?|follow[- ]?up|FU)\s+(?:in\s+)?(about\s+\d+\s+\w+|\d+\s+\w+)\b/i
+    ) ??
+    firstMatch(
+      text,
+      /\b(?:follow[- ]?up|FU)\s*(?:is|=|:|in)?\s*(none|no follow[- ]?up|as needed)\b/i
+    );
   if (followUp) {
     context.follow_up = followUp.trim();
   }
@@ -262,7 +304,10 @@ function extractFromFreeText(text: string) {
     text,
     /^\s*(?:[-*\u2022]\s*)?([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){1,3})\s*\((?:MRN|medical record)/m
   );
-  const signoff = firstMatch(text, /\b(?:Best|Regards|Thanks),?\s*\n\s*([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){1,3})\b/i);
+  const signoff = firstMatch(
+    text,
+    /\b(?:Best|Regards|Thanks),?\s*\n\s*([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){1,3})\b/i
+  );
   const patientName = nameLine ?? signoff;
   if (patientName) {
     context.patient_name = patientName;
@@ -280,7 +325,8 @@ function mergeExtracted(
 ) {
   return attempts.reduce((best, current) => {
     const bestCount = Object.keys(best.input).length + Object.keys(best.context).length;
-    const currentCount = Object.keys(current.input).length + Object.keys(current.context).length;
+    const currentCount =
+      Object.keys(current.input).length + Object.keys(current.context).length;
     return currentCount > bestCount ? current : best;
   });
 }
