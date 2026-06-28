@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "About us — Kernel"
+  title: "About us · Kernel"
 };
 
 export default function AboutPage() {

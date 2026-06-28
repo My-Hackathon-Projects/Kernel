@@ -590,17 +590,17 @@ flowchart LR
     ToolDetail --> RunDetail
 ```
 
-1. **Approval inbox** — live pending approvals over SSE. Each card shows the
+1. **Approval inbox**, live pending approvals over SSE. Each card shows the
    action and resolved inputs with Approve and Reject. The demo centerpiece.
-2. **Run detail / trace viewer** — step timeline with screenshots, inputs,
+2. **Run detail / trace viewer**, step timeline with screenshots, inputs,
    approval record, validation, healing events, and failure reason.
-3. **Runs list** — recent runs with status and duration.
-4. **Tools registry** — tools, schemas, an MCP connection snippet, and a
+3. **Runs list**, recent runs with status and duration.
+4. **Tools registry**, tools, schemas, an MCP connection snippet, and a
    built-in Test Invoke button that calls the tool through the same path an agent
    would.
-5. **Workflow review** — recorded steps, field-to-input mapping, risk tags.
-6. **Selector patches** — proposed heals awaiting acceptance.
-7. **Settings** — MCP endpoint URL and workspace token.
+5. **Workflow review**, recorded steps, field-to-input mapping, risk tags.
+6. **Selector patches**, proposed heals awaiting acceptance.
+7. **Settings**, MCP endpoint URL and workspace token.
 
 Data flow: Server Components read through `packages/db`. Mutations go through REST
 route handlers. Live run state arrives over SSE from `/api/runs/:id/stream`.
@@ -758,23 +758,23 @@ flowchart TB
 Ordered so each milestone ends in something demoable. Keep the codebase clean
 from the first commit.
 
-- **M0 — Scaffold.** pnpm workspace, the three apps and two packages, Prisma
+- **M0, Scaffold.** pnpm workspace, the three apps and two packages, Prisma
   schema, TypeScript strict, ESLint, Prettier, Vitest, CI on pull requests,
   `.env.example`.
-- **M1 — Mock portal.** The vendor form and a "Vendor created" success state.
+- **M1, Mock portal.** The vendor form and a "Vendor created" success state.
   The target the executor needs, so it comes first.
-- **M2 — Deterministic executor.** The runner replays a hand-authored
+- **M2, Deterministic executor.** The runner replays a hand-authored
   `create_vendor` workflow against the portal and captures a screenshot per step.
   Persists a Run and RunSteps. This is the first vertical slice (section 23).
-- **M3 — Compiler and MCP.** Compile the workflow into a Tool, expose it over the
+- **M3, Compiler and MCP.** Compile the workflow into a Tool, expose it over the
   MCP endpoint, invoke it from the built-in Test Invoke button.
-- **M4 — Approval gate and inbox.** Pause on the write step, surface it in the
+- **M4, Approval gate and inbox.** Pause on the write step, surface it in the
   approval inbox, resume on decision, stream updates over SSE.
-- **M5 — Validation.** Post-run check that the vendor exists; record pass or fail.
-- **M6 — Trace viewer.** The full run detail page with screenshots and records.
-- **M7 — Self-healing.** Break the submit selector, propose and test a patch,
+- **M5, Validation.** Post-run check that the vendor exists; record pass or fail.
+- **M6, Trace viewer.** The full run detail page with screenshots and records.
+- **M7, Self-healing.** Break the submit selector, propose and test a patch,
   recover, save the patch. The headline moment.
-- **M8 (stretch) — Recorder UI.** Replace hand-authored JSON with a record mode.
+- **M8 (stretch), Recorder UI.** Replace hand-authored JSON with a record mode.
 
 ## 23. First vertical slice
 

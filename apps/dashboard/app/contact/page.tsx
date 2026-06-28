@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Contact — Kernel"
+  title: "Contact · Kernel"
 };
 
 export default function ContactPage() {

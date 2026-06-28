@@ -5,7 +5,7 @@ const workflowSteps = [
   {
     num: "01",
     title: "Enable for this tab",
-    desc: "Open the workflow you want to automate. Tap the Kernel extension and enable it for this session. It sees only that one tab — nothing else in your browser, nothing in the background."
+    desc: "Open the workflow you want to automate. Tap the Kernel extension and enable it for this session. It sees only that one tab, nothing else in your browser, nothing in the background."
   },
   {
     num: "02",
@@ -23,19 +23,19 @@ const useCases = [
   {
     icon: "🏥",
     title: "Healthcare",
-    body: "A nurse finishes a 12-hour shift and has dozens of medical records to enter digitally. One wrong field can cost a life. Kernel learns her exact EHR workflow across a few sessions — and handles the data entry from then on. She reviews every record before it's saved.",
+    body: "A nurse finishes a 12-hour shift and has dozens of medical records to enter digitally. One wrong field can cost a life. Kernel learns her exact EHR workflow across a few sessions, and handles the data entry from then on. She reviews every record before it's saved.",
     stake: "Patient safety · Compliance · Zero-error tolerance"
   },
   {
     icon: "💼",
     title: "Finance & VC",
-    body: "Analysts spend hours logging portfolio data, transaction records, and compliance reports across multiple systems. The work is critical and the cost of errors is measured in millions. Kernel automates the repetition — not the oversight.",
+    body: "Analysts spend hours logging portfolio data, transaction records, and compliance reports across multiple systems. The work is critical and the cost of errors is measured in millions. Kernel automates the repetition, not the oversight.",
     stake: "Regulatory risk · Audit trails · Financial accuracy"
   },
   {
     icon: "🏢",
     title: "Enterprise Ops",
-    body: "Procurement and ops teams fill out vendor registrations, sourcing requests, and approval forms across SAP, Coupa, and ServiceNow every day. Kernel turns those recurring workflows into one-click skills — without any scripting or setup.",
+    body: "Procurement and ops teams fill out vendor registrations, sourcing requests, and approval forms across SAP, Coupa, and ServiceNow every day. Kernel turns those recurring workflows into one-click skills, without any scripting or setup.",
     stake: "Procurement speed · Data consistency · Portal sprawl"
   }
 ];
@@ -44,22 +44,22 @@ const whatKernelHandles = [
   {
     icon: "🌐",
     title: "Web portals & forms",
-    desc: "Any browser-based data entry — EHR systems, procurement portals, CRMs, banking interfaces"
+    desc: "Any browser-based data entry, EHR systems, procurement portals, CRMs, banking interfaces"
   },
   {
     icon: "📊",
     title: "Spreadsheets & Excel",
-    desc: "Formula application, data mapping, row transforms — recurring operations on new files"
+    desc: "Formula application, data mapping, row transforms, recurring operations on new files"
   },
   {
     icon: "📄",
     title: "PDFs, CSVs & documents",
-    desc: "Feed Kernel your data files for context — it reads structure and maps values intelligently"
+    desc: "Feed Kernel your data files for context, it reads structure and maps values intelligently"
   },
   {
     icon: "📷",
     title: "Physical docs & photos",
-    desc: "Upload a photo of a printed form or handwritten record — Kernel extracts and maps the fields"
+    desc: "Upload a photo of a printed form or handwritten record, Kernel extracts and maps the fields"
   }
 ];
 
@@ -123,19 +123,19 @@ const whatWeBuilt = [
     icon: "🧩",
     title: "Browser Extension",
     tag: "Chrome MV3",
-    desc: "Watches only the tab you authorize. Detects repeating data patterns across sessions and sends structured observations to the local skill layer — nothing leaves your machine without your say-so."
+    desc: "Watches only the tab you authorize. Detects repeating data patterns across sessions and sends structured observations to the local skill layer, nothing leaves your machine without your say-so."
   },
   {
     icon: "🔧",
     title: "MCP Skill Server",
     tag: "Model Context Protocol",
-    desc: "A custom MCP server is spun up per detected workflow. Your AI agent — Claude, Codex, Cursor — calls it to validate data and fill fields into the target portal. The skill lives locally and is reusable across sessions."
+    desc: "A custom MCP server is spun up per detected workflow. Your AI agent (Claude, Codex, Cursor) calls it to validate data and fill fields into the target portal. The skill lives locally and is reusable across sessions."
   },
   {
     icon: "🤖",
     title: "AI Validation Layer",
     tag: "Claude backend",
-    desc: "Claude processes the raw source data, validates field values against the target schema, maps them intelligently, and flags anything uncertain. It never submits — it prepares. You're always the last step."
+    desc: "Claude processes the raw source data, validates field values against the target schema, maps them intelligently, and flags anything uncertain. It never submits, it prepares. You're always the last step."
   },
   {
     icon: "🖥️",
@@ -180,8 +180,8 @@ export default function Page() {
                 </p>
                 <h1>Turn messy business data into validated, automated actions.</h1>
                 <p className="hero-lede">
-                  Kernel observes your repetitive data workflows — forms, spreadsheets,
-                  PDFs, physical records — validates the data, and builds a skill your
+                  Kernel observes your repetitive data workflows (forms, spreadsheets,
+                  PDFs, physical records), validates the data, and builds a skill your
                   AI agent can run. Colonel Kernel steps in to handle it. You review
                   every field before anything is committed.
                 </p>
@@ -247,7 +247,7 @@ export default function Page() {
                       </div>
                       <p>
                         I know this form. You&apos;ve filled it 47 times this month. Let
-                        me handle it — you review before it saves.
+                        me handle it, you review before it saves.
                       </p>
                       <div className="hero-colonel-btns">
                         <span className="hero-colonel-yes">Yes, fill it</span>
@@ -268,11 +268,11 @@ export default function Page() {
             <h2>Messy data, critical actions, and no validation layer in between.</h2>
           </div>
           <p>
-            Every business has structured work that lives outside APIs — nurses entering
+            Every business has structured work that lives outside APIs, nurses entering
             patient records, analysts logging compliance data, ops teams navigating
             procurement portals. The data is messy, the stakes are high, and
             there&apos;s no layer that validates what goes in before the action fires.
-            Kernel is that layer: it observes, validates, and automates — with a human
+            Kernel is that layer: it observes, validates, and automates, with a human
             approving every output.
           </p>
         </section>
@@ -326,14 +326,14 @@ export default function Page() {
               <h2>Your data never leaves your tab.</h2>
               <p>
                 Kernel runs at the agent layer, not the browser level. It sees nothing
-                beyond the specific tab you authorize for a session — no browser
-                history, no other open tabs, no PII it wasn&apos;t explicitly shown.
+                beyond the specific tab you authorize for a session, no browser history,
+                no other open tabs, no PII it wasn&apos;t explicitly shown.
               </p>
               <div className="privacy-points">
                 <div className="privacy-point">
                   <span>✓</span>
                   <p>
-                    Enable per-session, per-tab — you control exactly what Kernel sees
+                    Enable per-session, per-tab, you control exactly what Kernel sees
                   </p>
                 </div>
                 <div className="privacy-point">
@@ -403,7 +403,7 @@ export default function Page() {
           <div className="section-intro">
             <p className="eyebrow">Guided demo</p>
             <h2>
-              Walk through the full loop — from pattern detection to submitted record.
+              Walk through the full loop, from pattern detection to submitted record.
             </h2>
             <p>
               Click through five stages: Kernel notices a pattern, builds a skill,
@@ -419,8 +419,8 @@ export default function Page() {
             <p className="eyebrow">What we built</p>
             <h2>Four layers. One seamless loop.</h2>
             <p>
-              Kernel isn&apos;t a single tool — it&apos;s a stack. Each layer handles
-              one job, and they chain together so the human only touches the part that
+              Kernel isn&apos;t a single tool, it&apos;s a stack. Each layer handles one
+              job, and they chain together so the human only touches the part that
               matters: the final approval.
             </p>
           </div>
@@ -460,7 +460,7 @@ export default function Page() {
             <h2>Built by people who believe automation should never skip the human.</h2>
             <p>
               BCG strategy, SAP engineering, HyperIA creative production, and LMU HCI
-              research — united by a shared obsession for keeping humans in control of
+              research, united by a shared obsession for keeping humans in control of
               autonomous systems.
             </p>
           </div>

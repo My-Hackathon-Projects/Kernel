@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Imprint — Kernel"
+  title: "Imprint · Kernel"
 };
 
 export default function ImprintPage() {

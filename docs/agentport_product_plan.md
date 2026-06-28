@@ -173,27 +173,27 @@ must answer in the fixed schema.
 Postgres via Prisma. SQLite is the local fallback for a laptop demo. Core
 entities and their key fields:
 
-- **Workspace** — `id`, `name`. The tenant boundary. One row is fine for the demo.
-- **Target** — `id`, `workspaceId`, `name`, `baseUrl`, `authMode`. The web app a
+- **Workspace**, `id`, `name`. The tenant boundary. One row is fine for the demo.
+- **Target**, `id`, `workspaceId`, `name`, `baseUrl`, `authMode`. The web app a
   workflow runs against.
-- **Workflow** — `id`, `targetId`, `name`, `version`, `definition` (the JSON
+- **Workflow**, `id`, `targetId`, `name`, `version`, `definition` (the JSON
   above), `contentHash`, `createdAt`. Versioned; a new recording bumps `version`.
-- **Tool** — `id`, `workflowId`, `name`, `inputSchema` (JSON Schema), `enabled`.
+- **Tool**, `id`, `workflowId`, `name`, `inputSchema` (JSON Schema), `enabled`.
   The compiled, agent-facing artifact.
-- **Run** — `id`, `toolId`, `workflowVersion`, `input` (JSON), `status`
+- **Run**, `id`, `toolId`, `workflowVersion`, `input` (JSON), `status`
   (`pending` | `running` | `awaiting_approval` | `succeeded` | `failed`),
   `startedAt`, `finishedAt`, `error`, `callerId`.
-- **RunStep** — `id`, `runId`, `stepId`, `action`, `selector`, `resolvedValue`,
+- **RunStep**, `id`, `runId`, `stepId`, `action`, `selector`, `resolvedValue`,
   `status`, `durationMs`, `screenshotId`, `domSnapshotId`, `healedFrom`.
-- **ApprovalRequest** — `id`, `runId`, `stepId`, `prompt`, `payload` (the action
+- **ApprovalRequest**, `id`, `runId`, `stepId`, `prompt`, `payload` (the action
   and inputs shown to the human), `status` (`pending` | `approved` | `rejected`),
   `decidedBy`, `decidedAt`.
-- **Validation** — `id`, `runId`, `type`, `expected`, `actual`, `passed`.
-- **SelectorPatch** — `id`, `workflowId`, `stepId`, `oldSelector`, `newSelector`,
+- **Validation**, `id`, `runId`, `type`, `expected`, `actual`, `passed`.
+- **SelectorPatch**, `id`, `workflowId`, `stepId`, `oldSelector`, `newSelector`,
   `confidence`, `accepted`, `createdAt`.
-- **Artifact** — `id`, `runId`, `kind` (`screenshot` | `dom` | `trace`), `uri`,
+- **Artifact**, `id`, `runId`, `kind` (`screenshot` | `dom` | `trace`), `uri`,
   `createdAt`. Files go to blob storage or the local filesystem in dev.
-- **AuditEvent** — `id`, `workspaceId`, `runId`, `type`, `data`, `createdAt`.
+- **AuditEvent**, `id`, `workspaceId`, `runId`, `type`, `data`, `createdAt`.
   Append-only. Never updated or deleted.
 
 Relationships: Target 1..* Workflow 1..1 Tool. Tool 1..* Run 1..* RunStep. Run
@@ -263,41 +263,41 @@ execution; compiler and validator logic live in `packages/core`.
 
 Built with Next.js, Tailwind, shadcn/ui. Seven screens, ordered by demo value.
 
-1. **Approval inbox** — live list of pending approvals. Each card shows the
+1. **Approval inbox**, live list of pending approvals. Each card shows the
    action, the resolved inputs, and Approve / Reject. This is the demo
    centerpiece. Updates over SSE.
-2. **Run detail / trace viewer** — timeline of steps with screenshots, inputs,
+2. **Run detail / trace viewer**, timeline of steps with screenshots, inputs,
    the approval record, validation result, healing events, and failure reason.
-3. **Runs list** — recent runs with status and duration.
-4. **Tools registry** — compiled tools, their schemas, and a copy-paste MCP
+3. **Runs list**, recent runs with status and duration.
+4. **Tools registry**, compiled tools, their schemas, and a copy-paste MCP
    connection snippet plus a built-in "Test invoke" button that calls the tool
    exactly like an agent would.
-5. **Workflow review** — the recorded steps, field-to-input mapping, and risk
+5. **Workflow review**, the recorded steps, field-to-input mapping, and risk
    tags. Edit and recompile.
-6. **Selector patches** — proposed self-healing patches awaiting acceptance.
-7. **Settings** — MCP endpoint URL and workspace token.
+6. **Selector patches**, proposed self-healing patches awaiting acceptance.
+7. **Settings**, MCP endpoint URL and workspace token.
 
 ## Build milestones
 
 Ordered so each milestone ends in something demoable. Keep the codebase clean
 from the first commit.
 
-- **M0 — Scaffold.** pnpm workspace, the three apps and two packages, Prisma
+- **M0, Scaffold.** pnpm workspace, the three apps and two packages, Prisma
   schema, TypeScript strict, ESLint, Prettier, Vitest, CI on PR, `.env.example`.
-- **M1 — Mock portal.** The vendor form and a "Vendor created" success state.
+- **M1, Mock portal.** The vendor form and a "Vendor created" success state.
   This is the target the executor needs, so it comes first.
-- **M2 — Deterministic executor.** Runner replays a hand-authored
+- **M2, Deterministic executor.** Runner replays a hand-authored
   `create_vendor` workflow against the portal and captures a screenshot per
   step. Persists a Run and RunSteps. This is the first vertical slice.
-- **M3 — Compiler + MCP.** Compile the workflow into a Tool, expose it over the
+- **M3, Compiler + MCP.** Compile the workflow into a Tool, expose it over the
   MCP endpoint, invoke it from the built-in test invoker.
-- **M4 — Approval gate + inbox.** Pause on the write step, surface it in the
+- **M4, Approval gate + inbox.** Pause on the write step, surface it in the
   approval inbox, resume on decision, stream updates over SSE.
-- **M5 — Validation.** Post-run check that the vendor exists; record pass/fail.
-- **M6 — Trace viewer.** The full run detail page with screenshots and records.
-- **M7 — Self-healing.** Break the submit selector, propose and test a patch,
+- **M5, Validation.** Post-run check that the vendor exists; record pass/fail.
+- **M6, Trace viewer.** The full run detail page with screenshots and records.
+- **M7, Self-healing.** Break the submit selector, propose and test a patch,
   recover, save the patch. The headline moment.
-- **M8 (stretch) — Recorder UI.** Replace hand-authored JSON with a record mode.
+- **M8 (stretch), Recorder UI.** Replace hand-authored JSON with a record mode.
 
 ## Quality gates
 

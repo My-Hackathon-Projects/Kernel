@@ -36,13 +36,13 @@ const SCENARIOS: Record<string, Scenario> = {
     detectFinding:
       "Same patient discharge data entered across 3 different hospital systems. Kernel sees a pattern worth automating.",
     colonelDetect:
-      "You've entered discharge summaries 47 times this month across 3 different systems. Let me handle this — you review before anything saves to the patient record.",
+      "You've entered discharge summaries 47 times this month across 3 different systems. Let me handle this, you review before anything saves to the patient record.",
     fields: {
       "Patient ID": "CHN-2024-003847",
       "Diagnosis Code": "ICD-10: J18.9",
       "Attending Physician": "Dr. Sarah Miller",
       "Discharge Date": "2024-06-27",
-      "Follow-up Required": "Yes — 2 weeks"
+      "Follow-up Required": "Yes, 2 weeks"
     },
     skillName: "discharge_autofill",
     portals: ["Medscape EHR", "Epic Systems", "Hospital Portal"],
@@ -52,7 +52,7 @@ const SCENARIOS: Record<string, Scenario> = {
     portalTitle: "Patient Discharge Summary",
     portalBreadcrumb: "Patient Records › Discharge › New Entry",
     colonelOffer: "I know exactly what goes here. Fill it in for you?",
-    filledBadge: "🫡 Filled by Kernel — review before saving to patient record",
+    filledBadge: "🫡 Filled by Kernel, review before saving to patient record",
     reviewNote:
       "Every field is editable. Nothing has been written to the patient record yet. Click Submit when you're satisfied.",
     doneTitle: "Record saved.",
@@ -64,7 +64,7 @@ const SCENARIOS: Record<string, Scenario> = {
       { value: "1", label: "human approval" }
     ],
     evidence: [
-      "discharge_autofill run #48 — completed",
+      "discharge_autofill run #48, completed",
       "Screenshot captured at each step",
       "Human reviewed and approved all fields",
       "Patient record validated post-submit"
@@ -98,7 +98,7 @@ const SCENARIOS: Record<string, Scenario> = {
     portalTitle: "New Supplier Registration",
     portalBreadcrumb: "Suppliers › New Supplier Registration",
     colonelOffer: "I know exactly what goes here. Fill it in for you?",
-    filledBadge: "🫡 Filled by Kernel — review before submitting",
+    filledBadge: "🫡 Filled by Kernel, review before submitting",
     reviewNote:
       "Every field is editable. Nothing has been touched on the server yet. Click Submit when you're satisfied.",
     doneTitle: "Supplier registered.",
@@ -110,7 +110,7 @@ const SCENARIOS: Record<string, Scenario> = {
       { value: "1", label: "human approval" }
     ],
     evidence: [
-      "vendor_autofill run #4 — completed",
+      "vendor_autofill run #4, completed",
       "Screenshot captured at each step",
       "Human reviewed and approved inputs",
       "Post-submit validation passed"
@@ -150,7 +150,7 @@ function StageDetect({ s }: { s: Scenario }) {
   return (
     <div className="demo-stage-content">
       <div className="detect-log">
-        <p className="demo-sublabel">Activity log — this week</p>
+        <p className="demo-sublabel">Activity log, this week</p>
         {s.history.map((h) => (
           <div key={h.day} className="detect-row">
             <span className="detect-day">{h.day}</span>

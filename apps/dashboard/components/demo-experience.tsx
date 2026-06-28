@@ -444,7 +444,7 @@ function EvidenceModal({
           {Object.entries(values).map(([key, value]) => (
             <div key={key} className="evidence-input">
               <span>{key}</span>
-              <strong>{value || "—"}</strong>
+              <strong>{value || "-"}</strong>
             </div>
           ))}
         </div>
@@ -1003,10 +1003,10 @@ export function DemoExperience(props: DemoExperienceProps) {
             <span>data diagnostics</span>
           </div>
           <p className="muted">
-            Export discharges from your EHR — Epic, Cerner, a spreadsheet, anything —
-            and drop the file in. Kernel reads any layout, maps the columns it
-            recognizes onto the tool inputs, and tells you which records are ready
-            before anything runs.
+            Export discharges from your EHR (Epic, Cerner, a spreadsheet, anything) and
+            drop the file in. Kernel reads any layout, maps the columns it recognizes
+            onto the tool inputs, and tells you which records are ready before anything
+            runs.
           </p>
           <div className="demo-actions">
             <button type="button" onClick={() => void loadSample()}>
@@ -1073,13 +1073,13 @@ export function DemoExperience(props: DemoExperienceProps) {
                         <td data-label="Patient">
                           {candidate.raw["Patient Name"] ??
                             candidate.raw["Patient"] ??
-                            "—"}
+                            "-"}
                         </td>
                         <td className="mono" data-label="MRN">
-                          {candidate.raw["MRN"] || "—"}
+                          {candidate.raw["MRN"] || "-"}
                         </td>
                         <td className="mono" data-label="Diagnosis">
-                          {candidate.values["diagnosis_code"] || "—"}
+                          {candidate.values["diagnosis_code"] || "-"}
                         </td>
                         <td data-label="Risk">
                           <RiskPill
@@ -1124,7 +1124,7 @@ export function DemoExperience(props: DemoExperienceProps) {
                     <p>
                       A free-text column on “{headline.raw["Patient Name"]}” says “
                       {INJECTION_DEMAND}”. It is not a mapped tool input, so it never
-                      reaches the workflow — the real readmission risk (
+                      reaches the workflow, the real readmission risk (
                       {headline.values["readmission_risk"]}) is used and approval is
                       still required.
                     </p>
@@ -1230,7 +1230,7 @@ export function DemoExperience(props: DemoExperienceProps) {
                   </div>
                   <div className={`portal-submit ${submitted ? "submitted" : ""}`}>
                     {submitted
-                      ? "✓ Filed — awaiting clinical sign-off"
+                      ? "✓ Filed, awaiting clinical sign-off"
                       : "File Discharge"}
                   </div>
                 </div>
@@ -1268,7 +1268,7 @@ export function DemoExperience(props: DemoExperienceProps) {
               </div>
               {headline.injection ? (
                 <p className="approval-trust">
-                  🛡 Source document tried to force “{INJECTION_DEMAND}”. Ignored —
+                  🛡 Source document tried to force “{INJECTION_DEMAND}”. Ignored,
                   readmission_risk stays{" "}
                   <strong>{headline.values["readmission_risk"]}</strong>, and this gate
                   still requires you.
@@ -1407,8 +1407,8 @@ export function DemoExperience(props: DemoExperienceProps) {
             <span>v{version}</span>
           </div>
           <p className="muted">
-            That recorded workflow is compiled into a typed tool any MCP client can call
-            — Claude, Cursor, or your own agent. Same deterministic execution, same
+            That recorded workflow is compiled into a typed tool any MCP client can
+            call, Claude, Cursor, or your own agent. Same deterministic execution, same
             approval gate, same evidence. Point it at procurement, finance, or any
             portal next.
           </p>

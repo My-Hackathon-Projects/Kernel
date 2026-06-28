@@ -16,7 +16,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Kernel — Turn messy business data into validated, automated actions",
+  title: "Kernel · Turn messy business data into validated, automated actions",
   description:
     "Kernel observes your repetitive data workflows, validates the data, and builds a skill your AI agent can run. You approve every output."
 };
