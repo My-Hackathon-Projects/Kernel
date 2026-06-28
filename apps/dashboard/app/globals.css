@@ -2404,3 +2404,78 @@ body {
 .approval-actions button:hover,
 .invoke-form button:hover,
 .validator button:hover { background: #1E2D45; }
+
+/* ── What we built section (added after cdaf156) ── */
+.built-band {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 0 32px 96px;
+}
+
+.built-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.built-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 22px 26px;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.built-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+
+.built-card-top {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.built-icon { font-size: 26px; line-height: 1; }
+
+.built-tag {
+  background: var(--c-brand-faint);
+  border: 1px solid rgba(34,211,238,0.22);
+  border-radius: var(--r-full);
+  color: var(--c-brand);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.built-card h3 {
+  color: var(--c-ink);
+  font-family: var(--font-display, sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+
+.built-card p {
+  color: var(--c-ink-3);
+  font-size: 13.5px;
+  line-height: 1.65;
+  margin: 0;
+}
+
+@media (max-width: 980px) {
+  .built-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 580px) {
+  .built-grid { grid-template-columns: 1fr; }
+}
