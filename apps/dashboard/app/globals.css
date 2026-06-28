@@ -1179,18 +1179,12 @@ main { min-height: 100vh; overflow: hidden; }
 }
 
 .avatar {
-  --hue: 130;
-  align-items: center;
-  background: hsl(var(--hue) 50% 88%);
+  border: 2px solid var(--c-border-md);
   border-radius: 50%;
-  color: hsl(var(--hue) 42% 28%);
-  display: inline-flex;
-  font-family: var(--font-display, sans-serif);
-  font-size: 22px;
-  font-weight: 800;
+  display: block;
   height: 72px;
-  justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  object-fit: cover;
   width: 72px;
 }
 
@@ -1244,19 +1238,21 @@ main { min-height: 100vh; overflow: hidden; }
 
 .logo-tile {
   align-items: center;
-  background: var(--c-surface);
+  background: #fff;
   border: 1px solid var(--c-border-md);
   border-radius: var(--r-md);
-  color: var(--c-ink-3);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   display: inline-flex;
-  font-size: 13px;
-  font-weight: 700;
   height: 52px;
   justify-content: center;
-  letter-spacing: 0.2px;
-  min-width: 136px;
+  min-width: 140px;
   padding: 0 22px;
-  white-space: nowrap;
+}
+
+.logo-img {
+  max-height: 28px;
+  max-width: 104px;
+  object-fit: contain;
 }
 
 /* ─── CTA band ────────────────────────────────────── */

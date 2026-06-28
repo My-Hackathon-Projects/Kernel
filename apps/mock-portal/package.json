@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "dev": "WATCHPACK_POLLING=true next dev --port ${MOCK_PORTAL_PORT:-3001}",
+    "dev": "next dev --port 3001",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },

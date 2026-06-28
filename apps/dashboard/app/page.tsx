@@ -62,15 +62,27 @@ const capabilities = [
 ];
 
 const team = [
-  { name: "Sparsh Tyagi",   role: "Product & Engineering",  affiliation: "BCG · EuroTech Fellow",     initials: "ST", hue: 130 },
-  { name: "Felix Gros",     role: "ML & Infrastructure",    affiliation: "TUM · Research",             initials: "FG", hue: 162 },
-  { name: "Léa Fontaine",   role: "Design & Frontend",      affiliation: "Sciences Po · HEC Paris",    initials: "LF", hue: 282 },
-  { name: "Thomas Berger",  role: "Agent Systems",          affiliation: "Polytechnique · AWS",        initials: "TB", hue: 38  }
+  { name: "Sparsh Tyagi",                     bio: "BCG Applied AI, MMT at TUM, ex-Allianz, ex-Celonis, past founder",   photo: "/Team/Sparsh.jpg" },
+  { name: "Alicia Tyagi",                     bio: "CS & Business at Lehigh, DAAD RISE research intern at LMU Munich",           photo: "/Team/14.jpg" },
+  { name: "Gauthier Asselin de Williencourt", bio: "Franco-American filmmaker, co-founder of HyperIA, serial builder at SNCF",   photo: "/Team/15.jpg" },
+  { name: "Rishabh Tiwari",                   bio: "Full-stack engineer at SAP, ex-Porsche ML thesis, applied AI practitioner",   photo: "/Team/16.jpg" }
 ];
 
-const agentTools = [
-  "Claude Code", "Codex", "Cursor", "GitHub Copilot",
-  "Cline", "Continue", "Windsurf", "Amazon Q", "Zed", "Sourcegraph"
+const logoRail = [
+  { alt: "BCG",        src: "/logos/BCG.png" },
+  { alt: "Amazon",     src: "/logos/Amazon.png" },
+  { alt: "TUM",        src: "/logos/TUM.png" },
+  { alt: "Lehigh",     src: "/logos/Lehigh.jpeg" },
+  { alt: "LMU Munich", src: "/logos/LMU.png" },
+  { alt: "SAP",        src: "/logos/SAP.jpg" },
+  { alt: "Porsche",    src: "/logos/Porsche.png" },
+  { alt: "SNCF",       src: "/logos/SNCF.png" },
+  { alt: "NUS",        src: "/logos/NUS.png" },
+  { alt: "Celonis",    src: "/logos/Celonis.png" },
+  { alt: "Allianz",    src: "/logos/Allianz.png" },
+  { alt: "EY",         src: "/logos/EY_logo_2019.svg.png" },
+  { alt: "Deloitte",   src: "/logos/Deloitte-Logo.png" },
+  { alt: "Heidelberg", src: "/logos/Hidelberg.jpg" },
 ];
 
 const analyticsStats = [
@@ -328,31 +340,29 @@ export default function Page() {
             <p className="eyebrow">The team</p>
             <h2>Built by people who believe automation should never skip the human.</h2>
             <p>
-              We combine AI execution, ML research, product depth, and enterprise experience
-              — with a shared obsession for keeping humans in control of autonomous systems.
+              BCG strategy, SAP engineering, HyperIA creative production, and LMU HCI research
+              — united by a shared obsession for keeping humans in control of autonomous systems.
             </p>
           </div>
 
           <div className="team-grid">
             {team.map((m) => (
               <div key={m.name} className="team-card">
-                <div
-                  className="avatar"
-                  style={{ "--hue": String(m.hue) } as Record<string, string>}
-                >
-                  {m.initials}
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="avatar" src={m.photo} alt={m.name} />
                 <h3>{m.name}</h3>
-                <p className="team-role">{m.role}</p>
-                <p className="team-affil">{m.affiliation}</p>
+                <p className="team-role">{m.bio}</p>
               </div>
             ))}
           </div>
 
           <div className="logo-rail-wrapper" aria-hidden="true">
             <div className="logo-rail">
-              {[...agentTools, ...agentTools].map((name, i) => (
-                <span key={i} className="logo-tile">{name}</span>
+              {[...logoRail, ...logoRail].map((logo, i) => (
+                <div key={i} className="logo-tile">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={logo.src} alt={logo.alt} className="logo-img" />
+                </div>
               ))}
             </div>
           </div>
