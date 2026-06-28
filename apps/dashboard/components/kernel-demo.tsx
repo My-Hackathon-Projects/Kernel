@@ -34,7 +34,7 @@ const SCENARIOS: Record<string, Scenario> = {
       { day: "Thu", portal: "Hospital Portal", action: "Post-care record filing" },
     ],
     detectFinding:
-      "Same patient discharge data entered across 3 different hospital systems. Kernal sees a pattern worth automating.",
+      "Same patient discharge data entered across 3 different hospital systems. Kernel sees a pattern worth automating.",
     colonelDetect:
       "You've entered discharge summaries 47 times this month across 3 different systems. Let me handle this — you review before anything saves to the patient record.",
     fields: {
@@ -52,7 +52,7 @@ const SCENARIOS: Record<string, Scenario> = {
     portalTitle: "Patient Discharge Summary",
     portalBreadcrumb: "Patient Records › Discharge › New Entry",
     colonelOffer: "I know exactly what goes here. Fill it in for you?",
-    filledBadge: "🫡 Filled by Kernal — review before saving to patient record",
+    filledBadge: "🫡 Filled by Kernel — review before saving to patient record",
     reviewNote:
       "Every field is editable. Nothing has been written to the patient record yet. Click Submit when you're satisfied.",
     doneTitle: "Record saved.",
@@ -80,7 +80,7 @@ const SCENARIOS: Record<string, Scenario> = {
       { day: "Thu", portal: "Coupa Procurement",  action: "Add approved supplier" },
     ],
     detectFinding:
-      "Same supplier details across 3 different portals. Kernal sees a pattern worth automating.",
+      "Same supplier details across 3 different portals. Kernel sees a pattern worth automating.",
     colonelDetect:
       "I noticed you keep entering the same supplier details across different portals. Let me remember them for you.",
     fields: {
@@ -98,7 +98,7 @@ const SCENARIOS: Record<string, Scenario> = {
     portalTitle: "New Supplier Registration",
     portalBreadcrumb: "Suppliers › New Supplier Registration",
     colonelOffer: "I know exactly what goes here. Fill it in for you?",
-    filledBadge: "🫡 Filled by Kernal — review before submitting",
+    filledBadge: "🫡 Filled by Kernel — review before submitting",
     reviewNote:
       "Every field is editable. Nothing has been touched on the server yet. Click Submit when you're satisfied.",
     doneTitle: "Supplier registered.",
@@ -119,7 +119,7 @@ const SCENARIOS: Record<string, Scenario> = {
 };
 
 const STEPS = [
-  { id: "detect", num: "01", title: "Pattern spotted",  kicker: "Kernal noticed" },
+  { id: "detect", num: "01", title: "Pattern spotted",  kicker: "Kernel noticed" },
   { id: "skill",  num: "02", title: "Skill built",       kicker: "No config needed" },
   { id: "offer",  num: "03", title: "Colonel offers",    kicker: "Next portal visit" },
   { id: "review", num: "04", title: "You review",        kicker: "Nothing yet submitted" },
@@ -129,7 +129,7 @@ const STEPS = [
 const NEXT_LABELS = [
   "Build the skill →",
   "See it in action →",
-  "Let Kernal fill it →",
+  "Let Kernel fill it →",
   "Submit →",
   "Start over",
 ];
@@ -139,7 +139,7 @@ function ColonelTag({ text }: { text: string }) {
     <div className="colonel-tag">
       <span className="colonel-tag-face">🫡</span>
       <div>
-        <span className="colonel-tag-rank">Colonel Kernal ★★★</span>
+        <span className="colonel-tag-rank">Colonel Kernel ★★★</span>
         <p>{text}</p>
       </div>
     </div>
@@ -228,7 +228,7 @@ function StageOffer({ s }: { s: Scenario }) {
         <span className="colonel-popup-face">🫡</span>
         <div className="colonel-popup-body">
           <div className="colonel-popup-header">
-            <strong>Colonel Kernal</strong>
+            <strong>Colonel Kernel</strong>
             <span className="colonel-star-strip">★★★</span>
           </div>
           <p>{s.colonelOffer}</p>
@@ -303,7 +303,7 @@ function StageDone({ s }: { s: Scenario }) {
   );
 }
 
-export function KernalDemo() {
+export function KernelDemo() {
   const [scenarioKey, setScenarioKey] = useState<"healthcare" | "vendor">("healthcare");
   const [step, setStep] = useState(0);
   const s = SCENARIOS[scenarioKey];
@@ -323,7 +323,7 @@ export function KernalDemo() {
   }
 
   return (
-    <div className="kernal-demo-wrapper">
+    <div className="kernel-demo-wrapper">
       {/* Scenario switcher */}
       <div className="scenario-switcher">
         <span className="scenario-switcher-label">Scenario</span>
@@ -340,7 +340,7 @@ export function KernalDemo() {
         ))}
       </div>
 
-      <div className="kernal-demo">
+      <div className="kernel-demo">
         {/* Left stepper rail */}
         <ol className="demo-rail">
           {STEPS.map((st, i) => {
